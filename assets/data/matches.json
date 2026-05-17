@@ -1,0 +1,218 @@
+[
+  {
+    "id": 1,
+    "home_team": "Mexico",
+    "away_team": "South Africa",
+    "date": "2026-06-11",
+    "time": "17:00",
+    "stadium": "Estadio Azteca",
+    "status": "upcoming"
+  },
+  {
+    "id": 2,
+    "home_team": "South Korea",
+    "away_team": "Czechia",
+    "date": "2026-06-12",
+    "time": "14:00",
+    "stadium": "BC Place",
+    "status": "upcoming"
+  },
+  {
+    "id": 3,
+    "home_team": "Canada",
+    "away_team": "Bosnia and Herzegovina",
+    "date": "2026-06-12",
+    "time": "20:00",
+    "stadium": "BC Place",
+    "status": "upcoming"
+  },
+  {
+    "id": 4,
+    "home_team": "Qatar",
+    "away_team": "Switzerland",
+    "date": "2026-06-13",
+    "time": "15:00",
+    "stadium": "SoFi Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 5,
+    "home_team": "Brazil",
+    "away_team": "Morocco",
+    "date": "2026-06-13",
+    "time": "18:00",
+    "stadium": "MetLife Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 6,
+    "home_team": "Haiti",
+    "away_team": "Scotland",
+    "date": "2026-06-14",
+    "time": "12:00",
+    "stadium": "BMO Field",
+    "status": "upcoming"
+  },
+  {
+    "id": 7,
+    "home_team": "United States",
+    "away_team": "Paraguay",
+    "date": "2026-06-14",
+    "time": "20:00",
+    "stadium": "AT&T Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 8,
+    "home_team": "Australia",
+    "away_team": "Turkey",
+    "date": "2026-06-15",
+    "time": "15:00",
+    "stadium": "Mercedes-Benz Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 9,
+    "home_team": "Germany",
+    "away_team": "Curaçao",
+    "date": "2026-06-15",
+    "time": "18:00",
+    "stadium": "Mercedes-Benz Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 10,
+    "home_team": "Ivory Coast",
+    "away_team": "Ecuador",
+    "date": "2026-06-16",
+    "time": "14:00",
+    "stadium": "Hard Rock Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 11,
+    "home_team": "Netherlands",
+    "away_team": "Japan",
+    "date": "2026-06-16",
+    "time": "21:00",
+    "stadium": "SoFi Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 12,
+    "home_team": "Sweden",
+    "away_team": "Tunisia",
+    "date": "2026-06-17",
+    "time": "12:00",
+    "stadium": "BMO Field",
+    "status": "upcoming"
+  },
+  {
+    "id": 13,
+    "home_team": "Belgium",
+    "away_team": "Egypt",
+    "date": "2026-06-17",
+    "time": "16:00",
+    "stadium": "AT&T Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 14,
+    "home_team": "Iran",
+    "away_team": "New Zealand",
+    "date": "2026-06-18",
+    "time": "15:00",
+    "stadium": "SoFi Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 15,
+    "home_team": "Spain",
+    "away_team": "Cape Verde",
+    "date": "2026-06-18",
+    "time": "20:00",
+    "stadium": "Hard Rock Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 16,
+    "home_team": "Saudi Arabia",
+    "away_team": "Uruguay",
+    "date": "2026-06-19",
+    "time": "14:00",
+    "stadium": "MetLife Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 17,
+    "home_team": "France",
+    "away_team": "Senegal",
+    "date": "2026-06-19",
+    "time": "18:00",
+    "stadium": "MetLife Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 18,
+    "home_team": "Iraq",
+    "away_team": "Norway",
+    "date": "2026-06-20",
+    "time": "13:00",
+    "stadium": "BMO Field",
+    "status": "upcoming"
+  },
+  {
+    "id": 19,
+    "home_team": "Argentina",
+    "away_team": "Algeria",
+    "date": "2026-06-20",
+    "time": "20:00",
+    "stadium": "Estadio Azteca",
+    "status": "upcoming"
+  },
+  {
+    "id": 20,
+    "home_team": "Austria",
+    "away_team": "Jordan",
+    "date": "2026-06-21",
+    "time": "15:00",
+    "stadium": "BC Place",
+    "status": "upcoming"
+  },
+  {
+    "id": 21,
+    "home_team": "Portugal",
+    "away_team": "Congo DR",
+    "date": "2026-06-21",
+    "time": "18:00",
+    "stadium": "SoFi Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 22,
+    "home_team": "Uzbekistan",
+    "away_team": "Colombia",
+    "date": "2026-06-22",
+    "time": "14:00",
+    "stadium": "AT&T Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 23,
+    "home_team": "England",
+    "away_team": "Croatia",
+    "date": "2026-06-22",
+    "time": "20:00",
+    "stadium": "Hard Rock Stadium",
+    "status": "upcoming"
+  },
+  {
+    "id": 24,
+    "home_team": "Ghana",
+    "away_team": "Panama",
+    "date": "2026-06-23",
+    "time": "16:00",
+    "stadium": "Mercedes-Benz Stadium",
+    "status": "upcoming"
+  }
+]

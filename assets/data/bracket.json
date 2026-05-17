@@ -1,0 +1,32 @@
+{
+  "round_of_32": [
+    { "id": "R32_1", "home": "W1A", "away": "R2B", "venue": "SoFi Stadium", "date": "2026-06-27", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_2", "home": "W1B", "away": "R2A", "venue": "MetLife Stadium", "date": "2026-06-27", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_3", "home": "W1C", "away": "R2D", "venue": "AT&T Stadium", "date": "2026-06-28", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_4", "home": "W1D", "away": "R2C", "venue": "Levi's Stadium", "date": "2026-06-28", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_5", "home": "W1E", "away": "R2F", "venue": "Arrowhead Stadium", "date": "2026-06-29", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_6", "home": "W1F", "away": "R2E", "venue": "Rose Bowl", "date": "2026-06-29", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_7", "home": "W1G", "away": "R2H", "venue": "Allegiant Stadium", "date": "2026-06-30", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R32_8", "home": "W1H", "away": "R2G", "venue": "Estadio Azteca", "date": "2026-06-30", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" }
+  ],
+  "round_of_16": [
+    { "id": "R16_1", "home": "W_R32_1", "away": "W_R32_2", "venue": "MetLife Stadium", "date": "2026-07-02", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R16_2", "home": "W_R32_3", "away": "W_R32_4", "venue": "SoFi Stadium", "date": "2026-07-02", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R16_3", "home": "W_R32_5", "away": "W_R32_6", "venue": "AT&T Stadium", "date": "2026-07-03", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "R16_4", "home": "W_R32_7", "away": "W_R32_8", "venue": "Estadio Azteca", "date": "2026-07-03", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" }
+  ],
+  "quarter_finals": [
+    { "id": "QF_1", "home": "W_R16_1", "away": "W_R16_2", "venue": "MetLife Stadium", "date": "2026-07-06", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "QF_2", "home": "W_R16_3", "away": "W_R16_4", "venue": "SoFi Stadium", "date": "2026-07-06", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" }
+  ],
+  "semi_finals": [
+    { "id": "SF_1", "home": "W_QF_1", "away": "W_QF_2", "venue": "MetLife Stadium", "date": "2026-07-09", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" },
+    { "id": "SF_2", "home": "W_QF_1", "away": "W_QF_2", "venue": "SoFi Stadium", "date": "2026-07-10", "time": "19:00", "home_score": null, "away_score": null, "status": "upcoming" }
+  ],
+  "third_place": {
+    "id": "TP_1", "home": "L_SF_1", "away": "L_SF_2", "venue": "AT&T Stadium", "date": "2026-07-13", "time": "17:00", "home_score": null, "away_score": null, "status": "upcoming"
+  },
+  "final": {
+    "id": "FINAL", "home": "W_SF_1", "away": "W_SF_2", "venue": "MetLife Stadium", "date": "2026-07-15", "time": "15:00", "home_score": null, "away_score": null, "status": "upcoming"
+  }
+}

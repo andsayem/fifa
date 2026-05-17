@@ -1,0 +1,50 @@
+[
+  {
+    "id": 1,
+    "name": "MetLife Stadium",
+    "city": "East Rutherford, NJ",
+    "capacity": 82500
+  },
+  {
+    "id": 2,
+    "name": "Azteca Stadium",
+    "city": "Mexico City, Mexico",
+    "capacity": 87523
+  },
+  {
+    "id": 3,
+    "name": "SoFi Stadium",
+    "city": "Inglewood, CA",
+    "capacity": 70240
+  },
+  {
+    "id": 4,
+    "name": "BC Place",
+    "city": "Vancouver, Canada",
+    "capacity": 54500
+  },
+  {
+    "id": 5,
+    "name": "Mercedes-Benz Stadium",
+    "city": "Atlanta, GA",
+    "capacity": 71000
+  },
+  {
+    "id": 6,
+    "name": "AT&T Stadium",
+    "city": "Arlington, TX",
+    "capacity": 80000
+  },
+  {
+    "id": 7,
+    "name": "BMO Field",
+    "city": "Toronto, Canada",
+    "capacity": 45000
+  },
+  {
+    "id": 8,
+    "name": "Hard Rock Stadium",
+    "city": "Miami, FL",
+    "capacity": 64767
+  }
+]
