@@ -553,23 +553,31 @@ Widget _buildNextMatchCountdownCard(
           ],
         ),
         const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
-            const SizedBox(width: 4),
-            Text(
-              '${settings.getFormattedDate(nextMatch)} @ ${settings.getFormattedTime(nextMatch)}',
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-            const SizedBox(width: 12),
-            Icon(Icons.stadium_outlined, size: 12, color: Colors.grey.shade500),
-            const SizedBox(width: 4),
-            Text(
-              nextMatch.stadium,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            children: [
+              Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade500),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  '${settings.getFormattedDate(nextMatch)} @ ${settings.getFormattedTime(nextMatch)}',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.stadium_outlined, size: 12, color: Colors.grey.shade500),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  nextMatch.stadium,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     ),

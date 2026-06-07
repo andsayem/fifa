@@ -105,10 +105,16 @@ class SettingsProvider with ChangeNotifier {
     final timeStr = '${hour.toString().padLeft(2, '0')}:$minuteStr $amPm';
 
     switch (_timezoneMode) {
-      case TimezoneMode.device:
-        final deviceOffset = DateTime.now().timeZoneOffset.inHours;
-        final sign = deviceOffset >= 0 ? '+' : '';
-        return '$timeStr (GMT$sign$deviceOffset)';
+      case TimezoneMode.device: {
+        final tzName = DateTime.now().timeZoneName;
+        final deviceOffset = DateTime.now().timeZoneOffset;
+        final offsetHours = deviceOffset.inHours;
+        final offsetMinutes = deviceOffset.inMinutes.remainder(60).abs();
+        final offsetStr = offsetMinutes > 0
+            ? 'GMT${offsetHours >= 0 ? "+" : ""}$offsetHours:${offsetMinutes.toString().padLeft(2, "0")}'
+            : 'GMT${offsetHours >= 0 ? "+" : ""}$offsetHours';
+        return '$timeStr ($tzName, $offsetStr)';
+      }
       case TimezoneMode.stadium:
         final offset = stadium != null ? getStadiumUtcOffset(stadium) : -5;
         final sign = offset >= 0 ? '+' : '';
