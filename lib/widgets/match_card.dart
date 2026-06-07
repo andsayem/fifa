@@ -225,11 +225,11 @@ class MatchCard extends StatelessWidget {
     final isStarted = matchDateTime.isBefore(DateTime.now());
 
     if (isStarted) {
-      bgColor = isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200;
+      bgColor = isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200;
       textColor = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
       label = 'FINISHED';
     } else {
-      bgColor = Theme.of(context).primaryColor.withOpacity(0.12);
+      bgColor = Theme.of(context).primaryColor.withValues(alpha: 0.12);
       textColor = isDark
           ? Theme.of(context).primaryColor
           : Theme.of(context).primaryColor;
@@ -266,12 +266,12 @@ class MatchCard extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
             color: isDark
-                ? Colors.white.withOpacity(0.06)
+                ? Colors.white.withValues(alpha: 0.06)
                 : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
               color: isDark
-                  ? Colors.white.withOpacity(0.08)
+                  ? Colors.white.withValues(alpha: 0.08)
                   : Colors.grey.shade200,
             ),
           ),

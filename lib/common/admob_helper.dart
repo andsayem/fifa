@@ -161,7 +161,7 @@ class AdmobHelper with WidgetsBindingObserver {
     final width = MediaQuery.of(context).size.width.toInt();
 
     final AnchoredAdaptiveBannerAdSize? size =
-        await AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(width);
+        await AdSize.getLargeAnchoredAdaptiveBannerAdSize(width);
 
     if (size == null) return null;
 

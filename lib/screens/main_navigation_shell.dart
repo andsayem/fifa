@@ -48,7 +48,7 @@ class _MainNavigationShellState extends State<MainNavigationShell> {
             _currentIndex = index;
           });
         },
-        indicatorColor: Theme.of(context).primaryColor.withOpacity(0.15),
+        indicatorColor: Theme.of(context).primaryColor.withValues(alpha: 0.15),
         destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined, color: isDark ? Colors.grey : Colors.grey.shade600),

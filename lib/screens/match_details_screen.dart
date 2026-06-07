@@ -1,5 +1,7 @@
 import 'package:fifa/common/admob_helper.dart';
+import 'package:fifa/presentation/controllers/purchase_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../models/match_model.dart';
@@ -23,13 +25,25 @@ class MatchDetailsScreen extends StatefulWidget {
 
 class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
   BannerAd? _bannerAd;
+
+  bool get _adsRemoved {
+    try {
+      return Get.find<PurchaseController>().adsRemoved.value;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    AdmobHelper.loadInterstitialAd();
+    if (!_adsRemoved) {
+      AdmobHelper.loadInterstitialAd();
+    }
     // ⚠️ delay banner load (important)
     Future.delayed(const Duration(seconds: 1), () async {
       if (!mounted) return;
+      if (_adsRemoved) return;
 
       final width = MediaQuery.of(context).size.width.toInt();
       final ad = await AdmobHelper.loadBannerAd(
@@ -43,6 +57,13 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
     });
   }
 
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final favProvider = Provider.of<FavoriteProvider>(context);
     final teamProvider = Provider.of<TeamProvider>(context);
@@ -67,7 +88,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
               height: 80,
               alignment: Alignment.center,
               // Use a subtle background to blend with the app theme
-              color: Colors.black.withOpacity(0.2),
+              color: Colors.black.withValues(alpha: 0.2),
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: AdWidget(ad: _bannerAd!),
@@ -113,7 +134,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isFav
-                            ? Colors.red.withOpacity(0.12)
+                            ? Colors.red.withValues(alpha: 0.12)
                             : Theme.of(context).primaryColor,
                         foregroundColor: isFav ? Colors.red : Colors.white,
                         elevation: 0,
@@ -195,7 +216,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -259,7 +280,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                             shape: BoxShape.circle,
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
+                                color: Colors.black.withValues(alpha: 0.3),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -557,7 +578,7 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withOpacity(0.08),
+                      color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(

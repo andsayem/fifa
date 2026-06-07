@@ -1,5 +1,7 @@
 import 'package:fifa/common/admob_helper.dart';
+import 'package:fifa/presentation/controllers/purchase_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../providers/team_provider.dart';
@@ -19,13 +21,25 @@ class TeamsScreen extends StatefulWidget {
 
 class _TeamsScreenState extends State<TeamsScreen> {
   BannerAd? _bannerAd;
+
+  bool get _adsRemoved {
+    try {
+      return Get.find<PurchaseController>().adsRemoved.value;
+    } catch (_) {
+      return false;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    AdmobHelper.loadInterstitialAd();
+    if (!_adsRemoved) {
+      AdmobHelper.loadInterstitialAd();
+    }
     // ⚠️ delay banner load (important)
     Future.delayed(const Duration(seconds: 1), () async {
       if (!mounted) return;
+      if (_adsRemoved) return;
 
       final width = MediaQuery.of(context).size.width.toInt();
       final ad = await AdmobHelper.loadBannerAd(
@@ -45,6 +59,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     final teamProvider = Provider.of<TeamProvider>(context);
     final matchProvider = Provider.of<MatchProvider>(context);
@@ -63,7 +78,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                 height: 80,
                 alignment: Alignment.center,
                 // Use a subtle background to blend with the app theme
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: AdWidget(ad: _bannerAd!),
@@ -187,7 +202,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
               borderRadius: BorderRadius.circular(18),
               side: BorderSide(
                 color: isDark
-                    ? Colors.white.withOpacity(0.06)
+                    ? Colors.white.withValues(alpha: 0.06)
                     : Colors.grey.shade100,
                 width: 1,
               ),
@@ -215,7 +230,7 @@ class _TeamsScreenState extends State<TeamsScreen> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.12),
+                            color: Colors.black.withValues(alpha: 0.12),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),

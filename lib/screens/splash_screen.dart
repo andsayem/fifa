@@ -95,11 +95,11 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: const Color(0xFF10B981).withOpacity(0.08),
-                        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.24), width: 1.5),
+                        color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.24), width: 1.5),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF10B981).withOpacity(0.15),
+                            color: const Color(0xFF10B981).withValues(alpha: 0.15),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -128,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             color: Colors.white,
                             shadows: [
                               Shadow(
-                                color: const Color(0xFF10B981).withOpacity(0.5),
+                                color: const Color(0xFF10B981).withValues(alpha: 0.5),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
