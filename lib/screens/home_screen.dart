@@ -1,7 +1,9 @@
 import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/match_provider.dart';
 import '../providers/team_provider.dart';
 import '../widgets/match_card.dart';
@@ -9,6 +11,7 @@ import '../models/match_model.dart';
 import '../models/venue_model.dart';
 import '../widgets/match_countdown_widget.dart';
 import '../providers/settings_provider.dart';
+import '../presentation/controllers/purchase_controller.dart';
 import 'settings_screen.dart';
 import 'team_details_screen.dart';
 import 'venue_details_screen.dart';
@@ -23,27 +26,35 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool _hasShownPopup = false;
+  late final PurchaseController _purchaseController;
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  bool _showBannerAd = true; // condition variable
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_hasShownPopup) {
-        _hasShownPopup = true;
-        showPurchasePopup();
+    _purchaseController = Get.find<PurchaseController>();
+
+    ever<bool>(_purchaseController.adsRemoved, (removed) {
+      if (removed && mounted) {
+        _bannerAd?.dispose();
+        setState(() {
+          _bannerAd = null;
+          _isBannerAdLoaded = false;
+        });
       }
     });
-    // Load banner ad after a short delay
+
     Future.delayed(const Duration(seconds: 1), () async {
-      if (!mounted) return;
+      if (!mounted || _purchaseController.adsRemoved.value) return;
       final width = MediaQuery.of(context).size.width.toInt();
       final banner = await AdmobHelper.loadBannerAd(
         size: AdSize(width: width - 27, height: 220),
       );
-      if (!mounted) return;
+      if (!mounted || _purchaseController.adsRemoved.value) {
+        banner?.dispose();
+        return;
+      }
       setState(() {
         _bannerAd = banner;
         _isBannerAdLoaded = true;
@@ -111,10 +122,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
 
                     // Subscribe / Remove Ads Banner
-                    _buildSubscribeBanner(context),
+                    Obx(() {
+                      if (_purchaseController.adsRemoved.value) {
+                        return const SizedBox.shrink();
+                      }
+                      return _buildSubscribeBanner(context);
+                    }),
 
-                    if (_showBannerAd && _isBannerAdLoaded && _bannerAd != null)
-                      Padding(
+                    //_buildLiveTvLink(context),
+                    Obx(() {
+                      if (_purchaseController.adsRemoved.value ||
+                          !_isBannerAdLoaded ||
+                          _bannerAd == null) {
+                        return const SizedBox.shrink();
+                      }
+                      return Padding(
                         padding: const EdgeInsets.only(bottom: 18),
                         child: Container(
                           width: double.infinity,
@@ -126,7 +148,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: AdWidget(ad: _bannerAd!),
                           ),
                         ),
-                      ),
+                      );
+                    }),
 
                     // Section 2: Today Highlight Matches
                     _buildSectionTitle(
@@ -421,6 +444,76 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildLiveTvLink(BuildContext context) {
+    final primaryColor = Theme.of(context).primaryColor;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: InkWell(
+        onTap: _openLiveTvLink,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF111827)
+                : Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.live_tv, color: primaryColor, size: 24),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Live TV',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Watch live football coverage at livealltv.com',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: primaryColor),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openLiveTvLink() async {
+    final uri = Uri.parse('https://livealltv.com/');
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open Live TV link.')),
+        );
+      }
+    }
   }
 }
 

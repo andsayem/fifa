@@ -1,5 +1,7 @@
 import 'package:fifa/common/admob_helper.dart';
+import 'package:fifa/presentation/controllers/purchase_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'package:provider/provider.dart';
@@ -18,21 +20,35 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen> {
   final TextEditingController _searchController = TextEditingController();
+  late final PurchaseController _purchaseController;
   BannerAd? _bannerAd;
   bool _isBannerAdLoaded = false;
-  bool _showBannerAd = true; //
+
   @override
   void initState() {
     super.initState();
-    super.initState();
+    _purchaseController = Get.find<PurchaseController>();
+
+    ever<bool>(_purchaseController.adsRemoved, (removed) {
+      if (removed && mounted) {
+        _bannerAd?.dispose();
+        setState(() {
+          _bannerAd = null;
+          _isBannerAdLoaded = false;
+        });
+      }
+    });
 
     Future.delayed(const Duration(seconds: 1), () async {
-      if (!mounted) return;
+      if (!mounted || _purchaseController.adsRemoved.value) return;
       final width = MediaQuery.of(context).size.width.toInt();
       final banner = await AdmobHelper.loadBannerAd(
         size: AdSize(width: width - 27, height: 220),
       );
-      if (!mounted) return;
+      if (!mounted || _purchaseController.adsRemoved.value) {
+        banner?.dispose();
+        return;
+      }
       setState(() {
         _bannerAd = banner;
         _isBannerAdLoaded = true;
@@ -108,7 +124,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
             ),
           ),
 
-          if (_showBannerAd && _isBannerAdLoaded && _bannerAd != null)
+          if (!_purchaseController.adsRemoved.value &&
+              _isBannerAdLoaded &&
+              _bannerAd != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 18),
               child: Container(

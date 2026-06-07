@@ -24,32 +24,38 @@ class MatchDetailsScreen extends StatefulWidget {
 }
 
 class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
+  late final PurchaseController _purchaseController;
   BannerAd? _bannerAd;
-
-  bool get _adsRemoved {
-    try {
-      return Get.find<PurchaseController>().adsRemoved.value;
-    } catch (_) {
-      return false;
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    if (!_adsRemoved) {
+    _purchaseController = Get.find<PurchaseController>();
+
+    if (!_purchaseController.adsRemoved.value) {
       AdmobHelper.loadInterstitialAd();
     }
-    // ⚠️ delay banner load (important)
+
+    ever<bool>(_purchaseController.adsRemoved, (removed) {
+      if (removed && mounted) {
+        _bannerAd?.dispose();
+        setState(() {
+          _bannerAd = null;
+        });
+      }
+    });
+
     Future.delayed(const Duration(seconds: 1), () async {
-      if (!mounted) return;
-      if (_adsRemoved) return;
+      if (!mounted || _purchaseController.adsRemoved.value) return;
 
       final width = MediaQuery.of(context).size.width.toInt();
       final ad = await AdmobHelper.loadBannerAd(
         size: AdSize(width: width - 35, height: 100),
       );
-      if (!mounted) return;
+      if (!mounted || _purchaseController.adsRemoved.value) {
+        ad?.dispose();
+        return;
+      }
 
       setState(() {
         _bannerAd = ad;
@@ -578,7 +584,9 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.08),
+                      color: Theme.of(
+                        context,
+                      ).primaryColor.withValues(alpha: 0.08),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
