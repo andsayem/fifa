@@ -1,4 +1,4 @@
-import 'package:fifa/common/admob_helper.dart';
+
 import 'package:fifa/presentation/controllers/purchase_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -95,10 +95,7 @@ Future<void> showPurchasePopup({bool showPreferenceButtons = true}) async {
   } else if (result == 'dontask') {
     await prefs.setBool('hide_purchase_dialog', true);
   }
-  // Show App Open Ad if ads are still not removed
-  if (!controller.adsRemoved.value) {
-    AdmobHelper.showAppOpenAd();
-  }
+
 }
 
 ////////////////////////////////////////////////////////////

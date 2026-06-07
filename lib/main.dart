@@ -1,6 +1,4 @@
-import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'providers/match_provider.dart';
 import 'providers/team_provider.dart';
@@ -12,18 +10,7 @@ import 'screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // ✅ Initialize AdMob
-  await MobileAds.instance.initialize();
-  final adHelper = AdmobHelper();
-  WidgetsBinding.instance.addObserver(adHelper);
-  adHelper.loadAppOpenAd(
-    onLoaded: () {
-      Future.delayed(const Duration(seconds: 2), () {
-        AdmobHelper.showAppOpenAd();
-      });
-    },
-  );
+  // AdMob services removed
   runApp(const MyApp());
 }
 
@@ -45,7 +32,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system, // Dynamically follows system theme
+        themeMode: ThemeMode.system,
         home: const SplashScreen(),
       ),
     );

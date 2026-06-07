@@ -1,4 +1,4 @@
-import 'package:fifa/common/admob_helper.dart';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/match_model.dart';
@@ -28,7 +28,6 @@ class MatchCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          // AdmobHelper.showInterstitialAd();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -69,7 +68,6 @@ class MatchCard extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () {
-                        //AdmobHelper.showInterstitialAd();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -126,7 +124,6 @@ class MatchCard extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () {
-                        AdmobHelper.showInterstitialAd();
                         Navigator.push(
                           context,
                           MaterialPageRoute(

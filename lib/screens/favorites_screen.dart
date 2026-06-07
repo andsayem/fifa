@@ -1,6 +1,6 @@
-import 'package:fifa/common/admob_helper.dart';
+
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:provider/provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/match_provider.dart';
@@ -14,33 +14,8 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  BannerAd? _bannerAd;
-  @override
-  void initState() {
-    super.initState();
-    AdmobHelper.loadInterstitialAd();
-    // ⚠️ delay banner load (important)
-    Future.delayed(const Duration(seconds: 1), () async {
-      if (!mounted) return;
-
-      final width = MediaQuery.of(context).size.width.toInt();
-      final ad = await AdmobHelper.loadBannerAd(
-        size: AdSize(width: width - 35, height: 100),
-      );
-      if (!mounted) return;
-
-      setState(() {
-        _bannerAd = ad;
-      });
-    });
-  }
 
   @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
-
   Widget build(BuildContext context) {
     final favProvider = Provider.of<FavoriteProvider>(context);
     final matchProvider = Provider.of<MatchProvider>(context);
@@ -51,20 +26,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         .toList();
 
     return Scaffold(
-      bottomNavigationBar: _bannerAd == null
-          ? const SizedBox.shrink()
-          : Container(
-              width: double.infinity,
-              // Set a fixed height for a balanced appearance across devices
-              height: 80,
-              alignment: Alignment.center,
-              // Use a subtle background to blend with the app theme
-              color: Colors.black.withOpacity(0.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: AdWidget(ad: _bannerAd!),
-              ),
-            ),
+// No ad banner,
       appBar: AppBar(title: const Text('My Favorites')),
       body: favProvider.isLoading || matchProvider.isLoading
           ? const Center(child: CircularProgressIndicator())

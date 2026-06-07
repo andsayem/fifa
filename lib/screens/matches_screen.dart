@@ -1,6 +1,6 @@
-import 'package:fifa/common/admob_helper.dart';
+
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:provider/provider.dart';
 import '../providers/match_provider.dart';
 import '../widgets/match_card.dart';
@@ -17,47 +17,15 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen> {
   final TextEditingController _searchController = TextEditingController();
-  BannerAd? _bannerAd;
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final matchProvider = Provider.of<MatchProvider>(context, listen: false);
-      if (widget.preSelectedTeam != null) {
-        _searchController.text = widget.preSelectedTeam!;
-        matchProvider.setSearchQuery(widget.preSelectedTeam!);
-        matchProvider.setFilter(MatchFilter.all);
-      } else {
-        _searchController.clear();
-        matchProvider.setSearchQuery('');
-      }
-    });
-    AdmobHelper.loadInterstitialAd();
-    // ⚠️ delay banner load (important)
-    Future.delayed(const Duration(seconds: 1), () async {
-      if (!mounted) return;
-
-      final width = MediaQuery.of(context).size.width.toInt();
-      final ad = await AdmobHelper.loadBannerAd(
-        size: AdSize(width: width - 35, height: 100),
-      );
-      if (!mounted) return;
-
-      setState(() {
-        _bannerAd = ad;
-      });
-    });
+    super.initState();
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
-    _bannerAd?.dispose();
-    if (widget.preSelectedTeam != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Provider.of<MatchProvider>(context, listen: false).setSearchQuery('');
-      });
-    }
     super.dispose();
   }
 
@@ -67,20 +35,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
     final matchProvider = Provider.of<MatchProvider>(context);
 
     return Scaffold(
-      bottomNavigationBar: _bannerAd == null
-          ? const SizedBox.shrink()
-          : Container(
-              width: double.infinity,
-              // Set a fixed height for a balanced appearance across devices
-              height: 80,
-              alignment: Alignment.center,
-              // Use a subtle background to blend with the app theme
-              color: Colors.black.withOpacity(0.2),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: AdWidget(ad: _bannerAd!),
-              ),
-            ),
+      bottomNavigationBar: const SizedBox.shrink(),
       appBar: AppBar(title: const Text('World Cup Matches')),
       body: Column(
         children: [

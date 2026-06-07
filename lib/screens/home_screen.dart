@@ -1,6 +1,5 @@
-import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:provider/provider.dart';
 import '../providers/match_provider.dart';
 import '../providers/team_provider.dart';
@@ -22,30 +21,13 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  BannerAd? _bannerAd;
   @override
   void initState() {
     super.initState();
-    AdmobHelper.loadInterstitialAd();
-    // ⚠️ delay banner load (important)
-    Future.delayed(const Duration(seconds: 1), () async {
-      if (!mounted) return;
-
-      final width = MediaQuery.of(context).size.width.toInt();
-      final ad = await AdmobHelper.loadBannerAd(
-        size: AdSize(width: width - 50, height: 250),
-      );
-      if (!mounted) return;
-
-      setState(() {
-        _bannerAd = ad;
-      });
-    });
   }
 
   @override
   void dispose() {
-    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -98,22 +80,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       context,
                       matchProvider.upcomingMatches,
                     ),
-
-                    _bannerAd == null
-                        ? const SizedBox.shrink()
-                        : Padding(
-                            padding: const EdgeInsets.only(bottom: 18),
-                            child: Container(
-                              width: double.infinity,
-                              height: _bannerAd!.size.height.toDouble(),
-                              alignment: Alignment.center,
-                              child: SizedBox(
-                                width: _bannerAd!.size.width.toDouble(),
-                                height: _bannerAd!.size.height.toDouble(),
-                                child: AdWidget(ad: _bannerAd!),
-                              ),
-                            ),
-                          ),
 
                     // Section 2: Today Highlight Matches
                     _buildSectionTitle(
