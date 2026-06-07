@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/venue_model.dart';
-import '../models/match_model.dart';
 import '../providers/match_provider.dart';
 import '../widgets/match_card.dart';
 import '../widgets/stadium_helper.dart';
@@ -48,7 +47,7 @@ class VenueDetailsScreen extends StatelessWidget {
                         child: Icon(
                           Icons.stadium_outlined,
                           size: 64,
-                          color: Colors.white.withOpacity(0.55),
+                          color: Colors.white.withValues(alpha: 0.55),
                         ),
                       ),
                     ),
@@ -59,8 +58,8 @@ class VenueDetailsScreen extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.4),
-                          Colors.black.withOpacity(0.85),
+                          Colors.black.withValues(alpha: 0.4),
+                          Colors.black.withValues(alpha: 0.85),
                         ],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
@@ -77,7 +76,7 @@ class VenueDetailsScreen extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: Colors.white.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Text(
@@ -171,9 +170,9 @@ class VenueDetailsScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.06),
+                        color: Colors.amber.withValues(alpha: 0.06),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.amber.withOpacity(0.15), width: 1),
+                        border: Border.all(color: Colors.amber.withValues(alpha: 0.15), width: 1),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -232,7 +231,7 @@ class VenueDetailsScreen extends StatelessWidget {
                             width: double.infinity,
                             padding: const EdgeInsets.all(24),
                             decoration: BoxDecoration(
-                              color: isDark ? Colors.white.withOpacity(0.02) : Colors.grey.shade100,
+                              color: isDark ? Colors.white.withValues(alpha: 0.02) : Colors.grey.shade100,
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: const Center(
@@ -271,7 +270,7 @@ class VenueDetailsScreen extends StatelessWidget {
         color: isDark ? const Color(0xFF1E293B) : Colors.grey.shade100,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.04) : Colors.grey.shade200,
+          color: isDark ? Colors.white.withValues(alpha: 0.04) : Colors.grey.shade200,
           width: 1,
         ),
       ),

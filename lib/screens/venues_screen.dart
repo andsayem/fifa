@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/team_provider.dart';
-import '../models/venue_model.dart';
 import '../widgets/stadium_helper.dart';
 import 'venue_details_screen.dart';
 
@@ -72,7 +71,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(16),
-                        borderSide: BorderSide(color: primaryColor.withOpacity(0.4), width: 1.5),
+                        borderSide: BorderSide(color: primaryColor.withValues(alpha: 0.4), width: 1.5),
                       ),
                     ),
                   ),
@@ -131,8 +130,8 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                           gradient: LinearGradient(
                                             colors: [
                                               Colors.transparent,
-                                              Colors.black.withOpacity(0.3),
-                                              Colors.black.withOpacity(0.85),
+                                              Colors.black.withValues(alpha: 0.3),
+                                              Colors.black.withValues(alpha: 0.85),
                                             ],
                                             begin: Alignment.topCenter,
                                             end: Alignment.bottomCenter,
@@ -147,7 +146,7 @@ class _VenuesScreenState extends State<VenuesScreen> {
                                         child: Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: Colors.black.withOpacity(0.65),
+                                            color: Colors.black.withValues(alpha: 0.65),
                                             borderRadius: BorderRadius.circular(12),
                                             border: Border.all(color: Colors.white24, width: 0.8),
                                           ),

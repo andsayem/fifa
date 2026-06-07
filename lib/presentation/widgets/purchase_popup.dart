@@ -1,4 +1,3 @@
-
 import 'package:fifa/presentation/controllers/purchase_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
@@ -95,7 +94,6 @@ Future<void> showPurchasePopup({bool showPreferenceButtons = true}) async {
   } else if (result == 'dontask') {
     await prefs.setBool('hide_purchase_dialog', true);
   }
-
 }
 
 ////////////////////////////////////////////////////////////
@@ -152,7 +150,7 @@ Widget _plans(PurchaseController c) {
               boxShadow: selected
                   ? [
                       BoxShadow(
-                        color: N8nColors.primary.withOpacity(0.4),
+                        color: N8nColors.primary.withValues(alpha: 0.4),
                         blurRadius: 20,
                       ),
                     ]

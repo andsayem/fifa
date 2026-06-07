@@ -75,7 +75,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                   borderRadius: BorderRadius.circular(30),
                   borderSide: BorderSide(
                     color: isDark
-                        ? Colors.white.withOpacity(0.08)
+                        ? Colors.white.withValues(alpha: 0.08)
                         : Colors.grey.shade200,
                   ),
                 ),
@@ -138,7 +138,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
                         color: isSelected
                             ? Theme.of(context).primaryColor
                             : (isDark
-                                  ? Colors.white.withOpacity(0.08)
+                                  ? Colors.white.withValues(alpha: 0.08)
                                   : Colors.grey.shade200),
                       ),
                     ),
@@ -215,12 +215,12 @@ class _MatchesScreenState extends State<MatchesScreen> {
         color: isDark ? const Color(0xFF131A22) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200,
+          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200,
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -234,7 +234,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
             // Header Top Bar with flag & name
             Container(
               padding: const EdgeInsets.all(16),
-              color: primaryColor.withOpacity(0.08),
+              color: primaryColor.withValues(alpha: 0.08),
               child: Row(
                 children: [
                   ClipOval(
@@ -282,10 +282,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.amber.withOpacity(0.12),
+                        color: Colors.amber.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: Colors.amber.withOpacity(0.3),
+                          color: Colors.amber.withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -386,10 +386,10 @@ class _MatchesScreenState extends State<MatchesScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.blueAccent.withOpacity(0.06),
+                      color: Colors.blueAccent.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color: Colors.blueAccent.withOpacity(0.1),
+                        color: Colors.blueAccent.withValues(alpha: 0.1),
                         width: 1,
                       ),
                     ),

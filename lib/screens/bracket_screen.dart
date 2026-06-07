@@ -29,6 +29,7 @@ class _BracketScreenState extends State<BracketScreen> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     final bracketProvider = Provider.of<BracketProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -92,34 +93,32 @@ class _BracketScreenState extends State<BracketScreen> {
 
     // Column spacing
     const colWidth = 180.0;
-    const colGap = 32.0;
     const matchH = 92.0;
 
-    final primaryColor = Theme.of(context).primaryColor;
     final connectorColor = isDark ? Colors.white24 : Colors.grey.shade300;
 
     // Y Centers for Left/Right Columns (card height is matchH = 92.0)
-    final y_r32 = List.generate(4, (i) => (matchH + matchH) * i + matchH / 2);
+    final yR32 = List.generate(4, (i) => (matchH + matchH) * i + matchH / 2);
 
     // Perfectly centered R16 calculations
-    const topPad_r16 = matchH; // 92.0
-    const spacing_r16 = matchH * 3; // 276.0
-    final y_r16 = List.generate(
+    const topPadR16 = matchH; // 92.0
+    const spacingR16 = matchH * 3; // 276.0
+    final yR16 = List.generate(
       2,
-      (i) => topPad_r16 + (matchH + spacing_r16) * i + matchH / 2,
+      (i) => topPadR16 + (matchH + spacingR16) * i + matchH / 2,
     );
 
     // Perfectly centered QF calculations
-    const topPad_qf = matchH * 3; // 276.0
-    final y_qf = [topPad_qf + matchH / 2]; // 322.0
+    const topPadQf = matchH * 3; // 276.0
+    final yQf = [topPadQf + matchH / 2]; // 322.0
 
     // Perfectly centered SF calculations
-    const topPad_sf = matchH * 3; // 276.0
-    final y_sf = [topPad_sf + matchH / 2]; // 322.0
+    const topPadSf = matchH * 3; // 276.0
+    final ySf = [topPadSf + matchH / 2]; // 322.0
 
     // Perfectly centered Final calculations
-    const topPad_final = matchH * 3; // 276.0
-    final y_final = [topPad_final + matchH / 2]; // 322.0
+    const topPadFinal = matchH * 3; // 276.0
+    final yFinal = [topPadFinal + matchH / 2]; // 322.0
 
     return IntrinsicHeight(
       child: Row(
@@ -140,14 +139,14 @@ class _BracketScreenState extends State<BracketScreen> {
             isLeftToRight: true,
             connections: [
               ForkConnection(
-                topY: y_r32[0],
-                bottomY: y_r32[1],
-                childY: y_r16[0],
+                topY: yR32[0],
+                bottomY: yR32[1],
+                childY: yR16[0],
               ),
               ForkConnection(
-                topY: y_r32[2],
-                bottomY: y_r32[3],
-                childY: y_r16[1],
+                topY: yR32[2],
+                bottomY: yR32[3],
+                childY: yR16[1],
               ),
             ],
           ),
@@ -158,18 +157,18 @@ class _BracketScreenState extends State<BracketScreen> {
             'ROUND OF 16',
             [r16[0], r16[1]],
             colWidth,
-            spacing_r16,
+            spacingR16,
             isDark,
-            topPad: topPad_r16,
+            topPad: topPadR16,
           ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: true,
             connections: [
               ForkConnection(
-                topY: y_r16[0],
-                bottomY: y_r16[1],
-                childY: y_qf[0],
+                topY: yR16[0],
+                bottomY: yR16[1],
+                childY: yQf[0],
               ),
             ],
           ),
@@ -182,14 +181,14 @@ class _BracketScreenState extends State<BracketScreen> {
             colWidth,
             matchH * 4 + 30,
             isDark,
-            topPad: topPad_qf,
+            topPad: topPadQf,
           ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: true,
             connections: [],
             straightConnections: [
-              StraightConnection(parentY: y_qf[0], childY: y_sf[0]),
+              StraightConnection(parentY: yQf[0], childY: ySf[0]),
             ],
           ),
 
@@ -197,7 +196,7 @@ class _BracketScreenState extends State<BracketScreen> {
           Column(
             children: [
               _buildRoundLabel(context, 'SEMI FINALS'),
-              const SizedBox(height: topPad_sf),
+              const SizedBox(height: topPadSf),
               _buildMatchCard(
                 context,
                 sf[0],
@@ -214,7 +213,7 @@ class _BracketScreenState extends State<BracketScreen> {
             isLeftToRight: true,
             connections: [],
             straightConnections: [
-              StraightConnection(parentY: y_sf[0], childY: y_final[0]),
+              StraightConnection(parentY: ySf[0], childY: yFinal[0]),
             ],
           ),
 
@@ -223,7 +222,7 @@ class _BracketScreenState extends State<BracketScreen> {
           Column(
             children: [
               _buildRoundLabel(context, 'FINAL 🏆'),
-              const SizedBox(height: topPad_final - 76),
+              const SizedBox(height: topPadFinal - 76),
               _buildChampionshipTrophyBanner(context, fin, isDark),
               const SizedBox(height: 12),
               _buildMatchCard(
@@ -241,7 +240,7 @@ class _BracketScreenState extends State<BracketScreen> {
             isLeftToRight: false,
             connections: [],
             straightConnections: [
-              StraightConnection(parentY: y_sf[0], childY: y_final[0]),
+              StraightConnection(parentY: ySf[0], childY: yFinal[0]),
             ],
           ),
 
@@ -249,7 +248,7 @@ class _BracketScreenState extends State<BracketScreen> {
           Column(
             children: [
               _buildRoundLabel(context, 'SEMI FINALS'),
-              const SizedBox(height: topPad_sf),
+              const SizedBox(height: topPadSf),
               _buildMatchCard(
                 context,
                 sf[1],
@@ -264,7 +263,7 @@ class _BracketScreenState extends State<BracketScreen> {
             isLeftToRight: false,
             connections: [],
             straightConnections: [
-              StraightConnection(parentY: y_qf[0], childY: y_sf[0]),
+              StraightConnection(parentY: yQf[0], childY: ySf[0]),
             ],
           ),
 
@@ -276,16 +275,16 @@ class _BracketScreenState extends State<BracketScreen> {
             colWidth,
             matchH * 4 + 30,
             isDark,
-            topPad: topPad_qf,
+            topPad: topPadQf,
           ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: false,
             connections: [
               ForkConnection(
-                topY: y_r16[0],
-                bottomY: y_r16[1],
-                childY: y_qf[0],
+                topY: yR16[0],
+                bottomY: yR16[1],
+                childY: yQf[0],
               ),
             ],
           ),
@@ -296,23 +295,23 @@ class _BracketScreenState extends State<BracketScreen> {
             'ROUND OF 16',
             [r16[2], r16[3]],
             colWidth,
-            spacing_r16,
+            spacingR16,
             isDark,
-            topPad: topPad_r16,
+            topPad: topPadR16,
           ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: false,
             connections: [
               ForkConnection(
-                topY: y_r32[0],
-                bottomY: y_r32[1],
-                childY: y_r16[0],
+                topY: yR32[0],
+                bottomY: yR32[1],
+                childY: yR16[0],
               ),
               ForkConnection(
-                topY: y_r32[2],
-                bottomY: y_r32[3],
-                childY: y_r16[1],
+                topY: yR32[2],
+                bottomY: yR32[3],
+                childY: yR16[1],
               ),
             ],
           ),
@@ -362,7 +361,7 @@ class _BracketScreenState extends State<BracketScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Theme.of(context).primaryColor.withOpacity(0.12),
+        color: Theme.of(context).primaryColor.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
@@ -408,15 +407,15 @@ class _BracketScreenState extends State<BracketScreen> {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isHighlight
-              ? Colors.amber.withOpacity(0.7)
-              : accentColor.withOpacity(0.2),
+              ? Colors.amber.withValues(alpha: 0.7)
+              : accentColor.withValues(alpha: 0.2),
           width: isHighlight ? 2.0 : 1,
         ),
         boxShadow: [
           BoxShadow(
             color: isHighlight
-                ? Colors.amber.withOpacity(0.2)
-                : Colors.black.withOpacity(isDark ? 0.35 : 0.08),
+                ? Colors.amber.withValues(alpha: 0.2)
+                : Colors.black.withValues(alpha: isDark ? 0.35 : 0.08),
             blurRadius: isHighlight ? 16 : 6,
             offset: const Offset(0, 3),
           ),
@@ -431,7 +430,7 @@ class _BracketScreenState extends State<BracketScreen> {
             decoration: BoxDecoration(
               color: isStarted
                   ? Colors.grey.shade700
-                  : accentColor.withOpacity(0.9),
+                  : accentColor.withValues(alpha: 0.9),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(13),
                 topRight: Radius.circular(13),
@@ -466,7 +465,7 @@ class _BracketScreenState extends State<BracketScreen> {
             indent: 12,
             endIndent: 12,
             color: isDark
-                ? Colors.white.withOpacity(0.08)
+                ? Colors.white.withValues(alpha: 0.08)
                 : Colors.grey.shade200,
           ),
 
@@ -485,7 +484,7 @@ class _BracketScreenState extends State<BracketScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: isDark
-                  ? Colors.white.withOpacity(0.03)
+                  ? Colors.white.withValues(alpha: 0.03)
                   : Colors.grey.shade50,
               borderRadius: const BorderRadius.only(
                 bottomLeft: Radius.circular(13),
@@ -547,7 +546,7 @@ class _BracketScreenState extends State<BracketScreen> {
               boxShadow: [
                 if (!isTBD)
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withValues(alpha: 0.15),
                     blurRadius: 3,
                     offset: const Offset(0, 1),
                   ),
@@ -558,7 +557,7 @@ class _BracketScreenState extends State<BracketScreen> {
               child: isTBD
                   ? Container(
                       color: isDark
-                          ? Colors.white.withOpacity(0.06)
+                          ? Colors.white.withValues(alpha: 0.06)
                           : Colors.grey.shade100,
                       child: Icon(
                         Icons.help_outline,
@@ -570,7 +569,7 @@ class _BracketScreenState extends State<BracketScreen> {
                       TeamLogoHelper.getLogo(teamName),
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
-                        color: accentColor.withOpacity(0.15),
+                        color: accentColor.withValues(alpha: 0.15),
                         child: Icon(Icons.flag, size: 10, color: accentColor),
                       ),
                     ),
@@ -623,7 +622,7 @@ class _BracketScreenState extends State<BracketScreen> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           decoration: BoxDecoration(
-            color: Colors.orange.withOpacity(0.12),
+            color: Colors.orange.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: const Text(
@@ -702,7 +701,7 @@ class _BracketScreenState extends State<BracketScreen> {
         border: Border.all(color: Colors.white30, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.amber.withOpacity(0.45),
+            color: Colors.amber.withValues(alpha: 0.45),
             blurRadius: 18,
             offset: const Offset(0, 4),
           ),
@@ -717,7 +716,7 @@ class _BracketScreenState extends State<BracketScreen> {
             color: Colors.white,
             shadows: [
               Shadow(
-                color: Colors.black.withOpacity(0.35),
+                color: Colors.black.withValues(alpha: 0.35),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -739,7 +738,7 @@ class _BracketScreenState extends State<BracketScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -779,16 +778,21 @@ class _BracketScreenState extends State<BracketScreen> {
   }
 
   String _formatTBDLabel(String raw) {
-    if (raw.startsWith('W_R32_'))
+    if (raw.startsWith('W_R32_')) {
       return 'Winner M${raw.replaceAll('W_R32_', '')}';
-    if (raw.startsWith('W_R16_'))
+    }
+    if (raw.startsWith('W_R16_')) {
       return 'Winner R16 M${raw.replaceAll('W_R16_', '')}';
-    if (raw.startsWith('W_QF_'))
+    }
+    if (raw.startsWith('W_QF_')) {
       return 'Winner QF${raw.replaceAll('W_QF_', '')}';
-    if (raw.startsWith('W_SF_'))
+    }
+    if (raw.startsWith('W_SF_')) {
       return 'Winner SF${raw.replaceAll('W_SF_', '')}';
-    if (raw.startsWith('L_SF_'))
+    }
+    if (raw.startsWith('L_SF_')) {
       return 'Loser SF${raw.replaceAll('L_SF_', '')}';
+    }
     if (raw.startsWith('W1')) return 'Winner Group ${raw.substring(2)}';
     if (raw.startsWith('R2')) return 'Runner-up ${raw.substring(2)}';
     return 'TBD';
@@ -897,8 +901,8 @@ class PitchBackdropPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..color = isDark
-          ? Colors.white.withOpacity(0.015)
-          : Colors.black.withOpacity(0.01)
+          ? Colors.white.withValues(alpha: 0.015)
+          : Colors.black.withValues(alpha: 0.01)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 

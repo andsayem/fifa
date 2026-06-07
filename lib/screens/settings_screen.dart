@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
+import '../presentation/widgets/purchase_popup.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -106,7 +107,7 @@ class SettingsScreen extends StatelessWidget {
                         Row(
                           children: [
                             Icon(Icons.access_time_filled, color: primaryColor),
-                            const SizedBox(width: 12),
+                      SizedBox(width: 12),
                             const Text(
                               'Select GMT Offset',
                               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -124,7 +125,7 @@ class SettingsScreen extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                               decoration: BoxDecoration(
-                                color: primaryColor.withOpacity(0.12),
+                                color: primaryColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -155,16 +156,86 @@ class SettingsScreen extends StatelessWidget {
               ],
 
               const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
+                child: Text(
+                  'SUPPORT & PREMIUM',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                    color: isDark ? Colors.grey : Colors.grey.shade700,
+                  ),
+                ),
+              ),
               Card(
-                color: primaryColor.withOpacity(0.08),
+                elevation: isDark ? 4 : 2,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                child: const Padding(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () async {
+                    await showPurchasePopup();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.amber.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.block,
+                            color: Colors.amber,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Remove Ads',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Subscribe to remove all ads and enjoy an ad-free experience.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? Colors.grey : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: isDark ? Colors.grey : Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Card(
+                color: primaryColor.withValues(alpha: 0.08),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  child: Padding(
                   padding: EdgeInsets.all(16.0),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Icon(Icons.info_outline, color: Colors.blueAccent, size: 22),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,29 +275,48 @@ class SettingsScreen extends StatelessWidget {
     final primaryColor = Theme.of(context).primaryColor;
     final isSelected = value == groupValue;
 
-    return RadioListTile<TimezoneMode>(
-      activeColor: primaryColor,
-      value: value,
-      groupValue: groupValue,
-      onChanged: onChanged,
-      title: Row(
-        children: [
-          Icon(icon, size: 22, color: isSelected ? primaryColor : Colors.grey),
-          const SizedBox(width: 12),
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              fontSize: 15,
+    return InkWell(
+      onTap: () => onChanged(value),
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+              color: isSelected ? primaryColor : Colors.grey,
+              size: 22,
             ),
-          ),
-        ],
-      ),
-      subtitle: Padding(
-        padding: const EdgeInsets.only(left: 34.0, top: 4.0),
-        child: Text(
-          subtitle,
-          style: const TextStyle(fontSize: 12, height: 1.2),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(icon, size: 22, color: isSelected ? primaryColor : Colors.grey),
+                      const SizedBox(width: 12),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 34.0),
+                    child: Text(
+                      subtitle,
+                      style: const TextStyle(fontSize: 12, height: 1.2),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
