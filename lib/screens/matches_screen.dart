@@ -1,5 +1,6 @@
-
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'package:provider/provider.dart';
 import '../providers/match_provider.dart';
@@ -17,15 +18,32 @@ class MatchesScreen extends StatefulWidget {
 
 class _MatchesScreenState extends State<MatchesScreen> {
   final TextEditingController _searchController = TextEditingController();
-
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+  bool _showBannerAd = true; //
   @override
   void initState() {
     super.initState();
     super.initState();
+
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+      final width = MediaQuery.of(context).size.width.toInt();
+      final banner = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 27, height: 220),
+      );
+      if (!mounted) return;
+      setState(() {
+        _bannerAd = banner;
+        _isBannerAdLoaded = true;
+      });
+    });
   }
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -89,6 +107,21 @@ class _MatchesScreenState extends State<MatchesScreen> {
               ),
             ),
           ),
+
+          if (_showBannerAd && _isBannerAdLoaded && _bannerAd != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 18),
+              child: Container(
+                width: double.infinity,
+                height: _bannerAd!.size.height.toDouble(),
+                alignment: Alignment.center,
+                child: SizedBox(
+                  width: _bannerAd!.size.width.toDouble(),
+                  height: _bannerAd!.size.height.toDouble(),
+                  child: AdWidget(ad: _bannerAd!),
+                ),
+              ),
+            ),
 
           // Filter Chips Row
           SingleChildScrollView(
@@ -215,7 +248,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
         color: isDark ? const Color(0xFF131A22) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200,
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.08)
+              : Colors.grey.shade200,
           width: 1.2,
         ),
         boxShadow: [

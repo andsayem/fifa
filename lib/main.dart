@@ -9,11 +9,13 @@ import 'providers/settings_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'presentation/controllers/purchase_controller.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // AdMob services removed
+    await MobileAds.instance.initialize();
   runApp(const MyApp());
+  // runApp duplicate removed
 }
 
 class MyApp extends StatelessWidget {

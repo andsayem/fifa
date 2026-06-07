@@ -1,4 +1,6 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../providers/match_provider.dart';
 import '../providers/team_provider.dart';
@@ -22,7 +24,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool _hasShownPopup = false;
-
+  BannerAd? _bannerAd;
+  bool _isBannerAdLoaded = false;
+  bool _showBannerAd = true; // condition variable
   @override
   void initState() {
     super.initState();
@@ -32,11 +36,25 @@ class _HomeScreenState extends State<HomeScreen> {
         showPurchasePopup();
       }
     });
+    // Load banner ad after a short delay
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+      final width = MediaQuery.of(context).size.width.toInt();
+      final banner = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 27, height: 220),
+      );
+      if (!mounted) return;
+      setState(() {
+        _bannerAd = banner;
+        _isBannerAdLoaded = true;
+      });
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+    _bannerAd?.dispose();
   }
 
   @override
@@ -72,6 +90,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
+
+      //https://livealltv.com/
       body: matchProvider.isLoading || teamProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
@@ -92,6 +112,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     // Subscribe / Remove Ads Banner
                     _buildSubscribeBanner(context),
+
+                    if (_showBannerAd && _isBannerAdLoaded && _bannerAd != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 18),
+                        child: Container(
+                          width: double.infinity,
+                          height: _bannerAd!.size.height.toDouble(),
+                          alignment: Alignment.center,
+                          child: SizedBox(
+                            width: _bannerAd!.size.width.toDouble(),
+                            height: _bannerAd!.size.height.toDouble(),
+                            child: AdWidget(ad: _bannerAd!),
+                          ),
+                        ),
+                      ),
 
                     // Section 2: Today Highlight Matches
                     _buildSectionTitle(
@@ -316,14 +351,14 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [primaryColor, primaryColor.withValues(alpha: 0.7)],
+          colors: [primaryColor, primaryColor.withOpacity(0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withValues(alpha: 0.3),
+            color: primaryColor.withOpacity(0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -337,7 +372,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
+                color: Colors.white.withOpacity(0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.block, color: Colors.white, size: 20),
@@ -359,7 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'Subscribe for an ad-free experience',
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: Colors.white.withOpacity(0.8),
                       fontSize: 11,
                     ),
                   ),
@@ -416,12 +451,14 @@ Widget _buildNextMatchCountdownCard(
       color: isDark ? const Color(0xFF131A22) : Colors.white,
       borderRadius: BorderRadius.circular(20),
       border: Border.all(
-        color: isDark ? Colors.white.withValues(alpha: 0.08) : Colors.grey.shade200,
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.08)
+            : Colors.grey.shade200,
         width: 1.2,
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.04),
+          color: Colors.black.withOpacity(0.2),
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),
@@ -567,7 +604,11 @@ Widget _buildNextMatchCountdownCard(
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.stadium_outlined, size: 12, color: Colors.grey.shade500),
+              Icon(
+                Icons.stadium_outlined,
+                size: 12,
+                color: Colors.grey.shade500,
+              ),
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
