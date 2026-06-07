@@ -1,4 +1,6 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../models/match_model.dart';
 import '../models/venue_model.dart';
@@ -10,28 +12,67 @@ import '../providers/settings_provider.dart';
 import 'team_details_screen.dart';
 import 'venue_details_screen.dart';
 
-class MatchDetailsScreen extends StatelessWidget {
+class MatchDetailsScreen extends StatefulWidget {
   final MatchModel match;
 
   const MatchDetailsScreen({super.key, required this.match});
 
   @override
+  State<MatchDetailsScreen> createState() => _MatchDetailsScreenState();
+}
+
+class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
+  BannerAd? _bannerAd;
+  @override
+  void initState() {
+    super.initState();
+    AdmobHelper.loadInterstitialAd();
+    // ⚠️ delay banner load (important)
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+
+      final width = MediaQuery.of(context).size.width.toInt();
+      final ad = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 35, height: 100),
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _bannerAd = ad;
+      });
+    });
+  }
+
   Widget build(BuildContext context) {
     final favProvider = Provider.of<FavoriteProvider>(context);
     final teamProvider = Provider.of<TeamProvider>(context);
-    final isFav = favProvider.isFavorite(match.id);
+    final isFav = favProvider.isFavorite(widget.match.id);
 
     // Look up stadium capacity details from venues in TeamProvider
     VenueModel? venueDetails;
     try {
       venueDetails = teamProvider.venues.firstWhere(
-        (v) => v.name.toLowerCase() == match.stadium.toLowerCase(),
+        (v) => v.name.toLowerCase() == widget.match.stadium.toLowerCase(),
       );
     } catch (_) {
       // Fallback
     }
 
     return Scaffold(
+      bottomNavigationBar: _bannerAd == null
+          ? const SizedBox.shrink()
+          : Container(
+              width: double.infinity,
+              // Set a fixed height for a balanced appearance across devices
+              height: 80,
+              alignment: Alignment.center,
+              // Use a subtle background to blend with the app theme
+              color: Colors.black.withOpacity(0.2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            ),
       appBar: AppBar(
         title: const Text('Match Details'),
         actions: [
@@ -41,7 +82,7 @@ class MatchDetailsScreen extends StatelessWidget {
               color: isFav ? Colors.red : Colors.white,
             ),
             onPressed: () {
-              favProvider.toggleFavorite(match.id);
+              favProvider.toggleFavorite(widget.match.id);
             },
           ),
         ],
@@ -71,21 +112,30 @@ class MatchDetailsScreen extends StatelessWidget {
                     height: 52,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isFav ? Colors.red.withOpacity(0.12) : Theme.of(context).primaryColor,
+                        backgroundColor: isFav
+                            ? Colors.red.withOpacity(0.12)
+                            : Theme.of(context).primaryColor,
                         foregroundColor: isFav ? Colors.red : Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: isFav ? const BorderSide(color: Colors.red, width: 1.0) : BorderSide.none,
+                          side: isFav
+                              ? const BorderSide(color: Colors.red, width: 1.0)
+                              : BorderSide.none,
                         ),
                       ),
-                      icon: Icon(isFav ? Icons.favorite : Icons.favorite_border),
+                      icon: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                      ),
                       label: Text(
                         isFav ? 'Remove from Favorites' : 'Add to Favorites',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
                       ),
                       onPressed: () {
-                        favProvider.toggleFavorite(match.id);
+                        favProvider.toggleFavorite(widget.match.id);
                       },
                     ),
                   ),
@@ -131,7 +181,8 @@ class MatchDetailsScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TeamDetailsScreen(teamName: match.homeTeam),
+                        builder: (context) =>
+                            TeamDetailsScreen(teamName: widget.match.homeTeam),
                       ),
                     );
                   },
@@ -147,23 +198,26 @@ class MatchDetailsScreen extends StatelessWidget {
                                 color: Colors.black.withOpacity(0.3),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
-                              )
+                              ),
                             ],
                           ),
                           child: ClipOval(
                             child: Image.network(
-                              TeamLogoHelper.getLogo(match.homeTeam),
+                              TeamLogoHelper.getLogo(widget.match.homeTeam),
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const CircleAvatar(radius: 40, child: Icon(Icons.flag, size: 36)),
+                                  const CircleAvatar(
+                                    radius: 40,
+                                    child: Icon(Icons.flag, size: 36),
+                                  ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          match.homeTeam,
+                          widget.match.homeTeam,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -191,7 +245,8 @@ class MatchDetailsScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TeamDetailsScreen(teamName: match.awayTeam),
+                        builder: (context) =>
+                            TeamDetailsScreen(teamName: widget.match.awayTeam),
                       ),
                     );
                   },
@@ -207,23 +262,26 @@ class MatchDetailsScreen extends StatelessWidget {
                                 color: Colors.black.withOpacity(0.3),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
-                              )
+                              ),
                             ],
                           ),
                           child: ClipOval(
                             child: Image.network(
-                              TeamLogoHelper.getLogo(match.awayTeam),
+                              TeamLogoHelper.getLogo(widget.match.awayTeam),
                               width: 80,
                               height: 80,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) =>
-                                  const CircleAvatar(radius: 40, child: Icon(Icons.flag, size: 36)),
+                                  const CircleAvatar(
+                                    radius: 40,
+                                    child: Icon(Icons.flag, size: 36),
+                                  ),
                             ),
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          match.awayTeam,
+                          widget.match.awayTeam,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -248,7 +306,9 @@ class MatchDetailsScreen extends StatelessWidget {
     Color bgColor;
     String text;
 
-    final matchDateTime = DateTime.parse("${match.date}T${match.time}:00");
+    final matchDateTime = DateTime.parse(
+      "${widget.match.date}T${widget.match.time}:00",
+    );
     final isStarted = matchDateTime.isBefore(DateTime.now());
 
     if (isStarted) {
@@ -281,7 +341,7 @@ class MatchDetailsScreen extends StatelessWidget {
 
   Widget _buildDetailsScoreCenter(BuildContext context) {
     final settings = Provider.of<SettingsProvider>(context, listen: false);
-    final matchDateTime = settings.getMatchUtcDateTime(match).toLocal();
+    final matchDateTime = settings.getMatchUtcDateTime(widget.match).toLocal();
     return Column(
       children: [
         Container(
@@ -334,7 +394,11 @@ class MatchDetailsScreen extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.info_outline, color: Theme.of(context).primaryColor, size: 20),
+                Icon(
+                  Icons.info_outline,
+                  color: Theme.of(context).primaryColor,
+                  size: 20,
+                ),
                 const SizedBox(width: 8),
                 const Text(
                   'Match Information',
@@ -343,28 +407,50 @@ class MatchDetailsScreen extends StatelessWidget {
               ],
             ),
             const Divider(height: 28),
-            _buildInfoRow(context, Icons.calendar_today_outlined, 'Date', settings.getFormattedDate(match)),
+            _buildInfoRow(
+              context,
+              Icons.calendar_today_outlined,
+              'Date',
+              settings.getFormattedDate(widget.match),
+            ),
             const SizedBox(height: 14),
-            _buildInfoRow(context, Icons.access_time, 'Kickoff Time', settings.getFormattedTime(match)),
+            _buildInfoRow(
+              context,
+              Icons.access_time,
+              'Kickoff Time',
+              settings.getFormattedTime(widget.match),
+            ),
             const SizedBox(height: 14),
-            _buildInfoRow(context, Icons.stadium_outlined, 'Stadium', match.stadium),
+            _buildInfoRow(
+              context,
+              Icons.stadium_outlined,
+              'Stadium',
+              widget.match.stadium,
+            ),
             const SizedBox(height: 14),
-            _buildInfoRow(context, Icons.tag, 'Match Status', match.status.toUpperCase()),
+            _buildInfoRow(
+              context,
+              Icons.tag,
+              'Match Status',
+              widget.match.status.toUpperCase(),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoRow(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildInfoRow(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     return Row(
       children: [
         Icon(icon, size: 18, color: Colors.grey),
         const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
         const Spacer(),
         Text(
           value,
@@ -388,7 +474,8 @@ class MatchDetailsScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => VenueDetailsScreen(venue: venueDetails),
+                    builder: (context) =>
+                        VenueDetailsScreen(venue: venueDetails),
                   ),
                 );
               },
@@ -396,72 +483,95 @@ class MatchDetailsScreen extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(20),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.stadium, color: Theme.of(context).primaryColor, size: 20),
-                const SizedBox(width: 8),
-                const Text(
-                  'Venue Profile',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            const Divider(height: 28),
-            Text(
-              match.stadium,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  venueDetails?.city ?? 'Host City',
-                  style: const TextStyle(fontSize: 13, color: Colors.grey),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'SEATING CAPACITY',
-                      style: TextStyle(fontSize: 10, color: Colors.grey, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      venueDetails != null
-                          ? venueDetails.capacity.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')
-                          : 'TBD',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withOpacity(0.08),
-                    shape: BoxShape.circle,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.stadium,
+                    color: Theme.of(context).primaryColor,
+                    size: 20,
                   ),
-                  child: Icon(Icons.stadium_outlined, size: 32, color: Theme.of(context).primaryColor),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'Venue Profile',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const Divider(height: 28),
+              Text(
+                widget.match.stadium,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
-              ],
-            ),
-          ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.location_on_outlined,
+                    size: 14,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    venueDetails?.city ?? 'Host City',
+                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'SEATING CAPACITY',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        venueDetails != null
+                            ? venueDetails.capacity.toString().replaceAllMapped(
+                                RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                (Match m) => '${m[1]},',
+                              )
+                            : 'TBD',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.stadium_outlined,
+                      size: 32,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-     ),
     );
   }
 }

@@ -1,4 +1,6 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../providers/team_provider.dart';
 import '../providers/match_provider.dart';
@@ -8,10 +10,41 @@ import '../widgets/team_logo_helper.dart';
 
 import 'team_details_screen.dart';
 
-class TeamsScreen extends StatelessWidget {
+class TeamsScreen extends StatefulWidget {
   const TeamsScreen({super.key});
 
   @override
+  State<TeamsScreen> createState() => _TeamsScreenState();
+}
+
+class _TeamsScreenState extends State<TeamsScreen> {
+  BannerAd? _bannerAd;
+  @override
+  void initState() {
+    super.initState();
+    AdmobHelper.loadInterstitialAd();
+    // ⚠️ delay banner load (important)
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+
+      final width = MediaQuery.of(context).size.width.toInt();
+      final ad = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 35, height: 100),
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _bannerAd = ad;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     final teamProvider = Provider.of<TeamProvider>(context);
     final matchProvider = Provider.of<MatchProvider>(context);
@@ -22,6 +55,20 @@ class TeamsScreen extends StatelessWidget {
     return DefaultTabController(
       length: groups.length,
       child: Scaffold(
+        bottomNavigationBar: _bannerAd == null
+            ? const SizedBox.shrink()
+            : Container(
+                width: double.infinity,
+                // Set a fixed height for a balanced appearance across devices
+                height: 80,
+                alignment: Alignment.center,
+                // Use a subtle background to blend with the app theme
+                color: Colors.black.withOpacity(0.2),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: AdWidget(ad: _bannerAd!),
+                ),
+              ),
         appBar: AppBar(
           title: const Text('Tournament Groups'),
           bottom: TabBar(
@@ -30,8 +77,14 @@ class TeamsScreen extends StatelessWidget {
             indicatorColor: Theme.of(context).primaryColor,
             labelColor: Theme.of(context).primaryColor,
             unselectedLabelColor: isDark ? Colors.grey : Colors.grey.shade600,
-            labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-            unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 14),
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize: 14,
+            ),
             tabs: groups.map((g) => Tab(text: 'GROUP $g')).toList(),
           ),
         ),
@@ -39,13 +92,18 @@ class TeamsScreen extends StatelessWidget {
             ? const Center(child: CircularProgressIndicator())
             : TabBarView(
                 children: groups.map((groupName) {
-                  final standings = teamProvider.groupStandings[groupName] ?? [];
-                  
+                  final standings =
+                      teamProvider.groupStandings[groupName] ?? [];
+
                   // Filter matches for this group
-                  final groupTeamNames = standings.map((s) => s.team.name.toLowerCase()).toList();
+                  final groupTeamNames = standings
+                      .map((s) => s.team.name.toLowerCase())
+                      .toList();
                   final groupMatches = matchProvider.matches.where((match) {
-                    return groupTeamNames.contains(match.homeTeam.toLowerCase()) &&
-                           groupTeamNames.contains(match.awayTeam.toLowerCase());
+                    return groupTeamNames.contains(
+                          match.homeTeam.toLowerCase(),
+                        ) &&
+                        groupTeamNames.contains(match.awayTeam.toLowerCase());
                   }).toList();
 
                   return RefreshIndicator(
@@ -59,20 +117,28 @@ class TeamsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: 16),
-                          
+
                           // Beautified Group Teams Grid
                           _buildGroupTeamsGrid(context, standings),
-                          
+
                           // Section: Group Fixtures
-                          _buildSectionTitle(context, 'Group Fixtures & Results', Icons.event_note),
-                          
+                          _buildSectionTitle(
+                            context,
+                            'Group Fixtures & Results',
+                            Icons.event_note,
+                          ),
+
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: groupMatches.isEmpty
                                 ? const Center(
                                     child: Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 24),
-                                      child: Text('No fixtures scheduled for this group.'),
+                                      padding: EdgeInsets.symmetric(
+                                        vertical: 24,
+                                      ),
+                                      child: Text(
+                                        'No fixtures scheduled for this group.',
+                                      ),
                                     ),
                                   )
                                 : Column(
@@ -92,7 +158,10 @@ class TeamsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupTeamsGrid(BuildContext context, List<GroupStandingModel> standings) {
+  Widget _buildGroupTeamsGrid(
+    BuildContext context,
+    List<GroupStandingModel> standings,
+  ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).primaryColor;
 
@@ -117,7 +186,9 @@ class TeamsScreen extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(18),
               side: BorderSide(
-                color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
+                color: isDark
+                    ? Colors.white.withOpacity(0.06)
+                    : Colors.grey.shade100,
                 width: 1,
               ),
             ),
@@ -128,7 +199,8 @@ class TeamsScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => TeamDetailsScreen(teamName: team.name),
+                    builder: (context) =>
+                        TeamDetailsScreen(teamName: team.name),
                   ),
                 );
               },
@@ -146,7 +218,7 @@ class TeamsScreen extends StatelessWidget {
                             color: Colors.black.withOpacity(0.12),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
-                          )
+                          ),
                         ],
                       ),
                       child: ClipOval(
@@ -206,10 +278,7 @@ class TeamsScreen extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ],
       ),

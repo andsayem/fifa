@@ -1,3 +1,4 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/match_model.dart';
@@ -27,6 +28,7 @@ class MatchCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
+          AdmobHelper.showInterstitialAd();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -67,15 +69,20 @@ class MatchCard extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () {
+                        AdmobHelper.showInterstitialAd();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TeamDetailsScreen(teamName: match.homeTeam),
+                            builder: (context) =>
+                                TeamDetailsScreen(teamName: match.homeTeam),
                           ),
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
                         child: Column(
                           children: [
                             ClipOval(
@@ -85,13 +92,19 @@ class MatchCard extends StatelessWidget {
                                 height: 48,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const CircleAvatar(radius: 24, child: Icon(Icons.flag)),
+                                    const CircleAvatar(
+                                      radius: 24,
+                                      child: Icon(Icons.flag),
+                                    ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               match.homeTeam,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -113,15 +126,20 @@ class MatchCard extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () {
+                        AdmobHelper.showInterstitialAd();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TeamDetailsScreen(teamName: match.awayTeam),
+                            builder: (context) =>
+                                TeamDetailsScreen(teamName: match.awayTeam),
                           ),
                         );
                       },
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 4,
+                        ),
                         child: Column(
                           children: [
                             ClipOval(
@@ -131,13 +149,19 @@ class MatchCard extends StatelessWidget {
                                 height: 48,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const CircleAvatar(radius: 24, child: Icon(Icons.flag)),
+                                    const CircleAvatar(
+                                      radius: 24,
+                                      child: Icon(Icons.flag),
+                                    ),
                               ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               match.awayTeam,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -154,19 +178,33 @@ class MatchCard extends StatelessWidget {
               // Bottom Row: Date & Time and Stadium Name
               Row(
                 children: [
-                  Icon(Icons.calendar_today, size: 14, color: isDark ? Colors.grey : Colors.grey.shade600),
+                  Icon(
+                    Icons.calendar_today,
+                    size: 14,
+                    color: isDark ? Colors.grey : Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     '${settings.getFormattedDate(match)} @ ${settings.getFormattedTime(match)}',
-                    style: TextStyle(fontSize: 12, color: isDark ? Colors.grey : Colors.grey.shade600),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isDark ? Colors.grey : Colors.grey.shade600,
+                    ),
                   ),
                   const Spacer(),
-                  Icon(Icons.stadium_outlined, size: 14, color: isDark ? Colors.grey : Colors.grey.shade600),
+                  Icon(
+                    Icons.stadium_outlined,
+                    size: 14,
+                    color: isDark ? Colors.grey : Colors.grey.shade600,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       match.stadium,
-                      style: TextStyle(fontSize: 12, color: isDark ? Colors.grey : Colors.grey.shade600),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey : Colors.grey.shade600,
+                      ),
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
                     ),
@@ -195,7 +233,9 @@ class MatchCard extends StatelessWidget {
       label = 'FINISHED';
     } else {
       bgColor = Theme.of(context).primaryColor.withOpacity(0.12);
-      textColor = isDark ? Theme.of(context).primaryColor : Theme.of(context).primaryColor;
+      textColor = isDark
+          ? Theme.of(context).primaryColor
+          : Theme.of(context).primaryColor;
       label = 'UPCOMING';
     }
 
@@ -228,9 +268,15 @@ class MatchCard extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
+            color: isDark
+                ? Colors.white.withOpacity(0.06)
+                : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200),
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withOpacity(0.08)
+                  : Colors.grey.shade200,
+            ),
           ),
           child: Text(
             'VS',

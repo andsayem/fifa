@@ -1,4 +1,6 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../providers/match_provider.dart';
 import '../providers/team_provider.dart';
@@ -12,10 +14,41 @@ import 'team_details_screen.dart';
 import 'venue_details_screen.dart';
 import 'venues_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  BannerAd? _bannerAd;
+  @override
+  void initState() {
+    super.initState();
+    AdmobHelper.loadInterstitialAd();
+    // ⚠️ delay banner load (important)
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+
+      final width = MediaQuery.of(context).size.width.toInt();
+      final ad = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 50, height: 250),
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _bannerAd = ad;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     final matchProvider = Provider.of<MatchProvider>(context);
     final teamProvider = Provider.of<TeamProvider>(context);
@@ -42,9 +75,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => const SettingsScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
               );
             },
           ),
@@ -67,6 +98,22 @@ class HomeScreen extends StatelessWidget {
                       context,
                       matchProvider.upcomingMatches,
                     ),
+
+                    _bannerAd == null
+                        ? const SizedBox.shrink()
+                        : Padding(
+                            padding: const EdgeInsets.only(bottom: 18),
+                            child: Container(
+                              width: double.infinity,
+                              height: _bannerAd!.size.height.toDouble(),
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                width: _bannerAd!.size.width.toDouble(),
+                                height: _bannerAd!.size.height.toDouble(),
+                                child: AdWidget(ad: _bannerAd!),
+                              ),
+                            ),
+                          ),
 
                     // Section 2: Today Highlight Matches
                     _buildSectionTitle(
@@ -231,7 +278,10 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -281,61 +331,61 @@ class HomeScreen extends StatelessWidget {
                 width: 175,
                 padding: const EdgeInsets.all(12),
                 child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.stadium_outlined,
-                        size: 18,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          venue.name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.stadium_outlined,
+                          size: 18,
+                          color: Theme.of(context).primaryColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            venue.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    venue.city,
-                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.people_outline,
-                        size: 12,
-                        color: Colors.grey,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${(venue.capacity / 1000).toStringAsFixed(0)}k capacity',
-                        style: const TextStyle(
-                          fontSize: 11,
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      venue.city,
+                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.people_outline,
+                          size: 12,
                           color: Colors.grey,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        const SizedBox(width: 4),
+                        Text(
+                          '${(venue.capacity / 1000).toStringAsFixed(0)}k capacity',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
+          );
         },
       ),
     );
@@ -432,12 +482,16 @@ class HomeScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TeamDetailsScreen(teamName: nextMatch.homeTeam),
+                        builder: (context) =>
+                            TeamDetailsScreen(teamName: nextMatch.homeTeam),
                       ),
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
                     child: Text(
                       nextMatch.homeTeam,
                       style: const TextStyle(
@@ -477,12 +531,16 @@ class HomeScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TeamDetailsScreen(teamName: nextMatch.awayTeam),
+                        builder: (context) =>
+                            TeamDetailsScreen(teamName: nextMatch.awayTeam),
                       ),
                     );
                   },
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 4,
+                      horizontal: 8,
+                    ),
                     child: Text(
                       nextMatch.awayTeam,
                       style: const TextStyle(

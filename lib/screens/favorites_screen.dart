@@ -1,13 +1,46 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../providers/favorite_provider.dart';
 import '../providers/match_provider.dart';
 import '../widgets/match_card.dart';
 
-class FavoritesScreen extends StatelessWidget {
+class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 
   @override
+  State<FavoritesScreen> createState() => _FavoritesScreenState();
+}
+
+class _FavoritesScreenState extends State<FavoritesScreen> {
+  BannerAd? _bannerAd;
+  @override
+  void initState() {
+    super.initState();
+    AdmobHelper.loadInterstitialAd();
+    // ⚠️ delay banner load (important)
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+
+      final width = MediaQuery.of(context).size.width.toInt();
+      final ad = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 35, height: 100),
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _bannerAd = ad;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     final favProvider = Provider.of<FavoriteProvider>(context);
     final matchProvider = Provider.of<MatchProvider>(context);
@@ -18,21 +51,33 @@ class FavoritesScreen extends StatelessWidget {
         .toList();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Favorites'),
-      ),
+      bottomNavigationBar: _bannerAd == null
+          ? const SizedBox.shrink()
+          : Container(
+              width: double.infinity,
+              // Set a fixed height for a balanced appearance across devices
+              height: 80,
+              alignment: Alignment.center,
+              // Use a subtle background to blend with the app theme
+              color: Colors.black.withOpacity(0.2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            ),
+      appBar: AppBar(title: const Text('My Favorites')),
       body: favProvider.isLoading || matchProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
           : favoriteMatches.isEmpty
-              ? _buildEmptyState(context)
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: favoriteMatches.length,
-                  itemBuilder: (context, index) {
-                    final match = favoriteMatches[index];
-                    return MatchCard(match: match);
-                  },
-                ),
+          ? _buildEmptyState(context)
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: favoriteMatches.length,
+              itemBuilder: (context, index) {
+                final match = favoriteMatches[index];
+                return MatchCard(match: match);
+              },
+            ),
     );
   }
 
@@ -51,7 +96,10 @@ class FavoritesScreen extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.red.withOpacity(0.08),
-                border: Border.all(color: Colors.red.withOpacity(0.15), width: 1.5),
+                border: Border.all(
+                  color: Colors.red.withOpacity(0.15),
+                  width: 1.5,
+                ),
               ),
               child: const Icon(
                 Icons.favorite_border,
@@ -64,10 +112,7 @@ class FavoritesScreen extends StatelessWidget {
             // Title
             const Text(
               'No Favorites Yet',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
 

@@ -1,19 +1,67 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../providers/bracket_provider.dart';
 import '../models/bracket_model.dart';
 import '../providers/settings_provider.dart';
 import '../widgets/team_logo_helper.dart';
 
-class BracketScreen extends StatelessWidget {
+class BracketScreen extends StatefulWidget {
   const BracketScreen({super.key});
 
   @override
+  State<BracketScreen> createState() => _BracketScreenState();
+}
+
+class _BracketScreenState extends State<BracketScreen> {
+  BannerAd? _bannerAd;
+
+  @override
+  void initState() {
+    super.initState();
+    AdmobHelper.loadInterstitialAd();
+    // ⚠️ delay banner load (important)
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+
+      final width = MediaQuery.of(context).size.width.toInt();
+      final ad = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 35, height: 100),
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _bannerAd = ad;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
     final bracketProvider = Provider.of<BracketProvider>(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      bottomNavigationBar: _bannerAd == null
+          ? const SizedBox.shrink()
+          : Container(
+              width: double.infinity,
+              // Set a fixed height for a balanced appearance across devices
+              height: 80,
+              alignment: Alignment.center,
+              // Use a subtle background to blend with the app theme
+              color: Colors.black.withOpacity(0.2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            ),
       appBar: AppBar(
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -41,8 +89,15 @@ class BracketScreen extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 60),
-                    child: _buildFullBracket(context, bracketProvider.bracket!, isDark),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 40,
+                      vertical: 60,
+                    ),
+                    child: _buildFullBracket(
+                      context,
+                      bracketProvider.bracket!,
+                      isDark,
+                    ),
                   ),
                 ],
               ),
@@ -50,7 +105,11 @@ class BracketScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildFullBracket(BuildContext context, BracketModel bracket, bool isDark) {
+  Widget _buildFullBracket(
+    BuildContext context,
+    BracketModel bracket,
+    bool isDark,
+  ) {
     final r32 = bracket.roundOf32;
     final r16 = bracket.roundOf16;
     final qf = bracket.quarterFinals;
@@ -68,11 +127,14 @@ class BracketScreen extends StatelessWidget {
 
     // Y Centers for Left/Right Columns (card height is matchH = 92.0)
     final y_r32 = List.generate(4, (i) => (matchH + matchH) * i + matchH / 2);
-    
+
     // Perfectly centered R16 calculations
     const topPad_r16 = matchH; // 92.0
     const spacing_r16 = matchH * 3; // 276.0
-    final y_r16 = List.generate(2, (i) => topPad_r16 + (matchH + spacing_r16) * i + matchH / 2);
+    final y_r16 = List.generate(
+      2,
+      (i) => topPad_r16 + (matchH + spacing_r16) * i + matchH / 2,
+    );
 
     // Perfectly centered QF calculations
     const topPad_qf = matchH * 3; // 276.0
@@ -91,28 +153,64 @@ class BracketScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // ── Round of 32 (Left Side) ──────────────────────────
-          _buildRoundColumn(context, 'ROUND OF 32', [r32[0], r32[1], r32[2], r32[3]], colWidth, matchH, isDark, leftConnector: false),
+          _buildRoundColumn(
+            context,
+            'ROUND OF 32',
+            [r32[0], r32[1], r32[2], r32[3]],
+            colWidth,
+            matchH,
+            isDark,
+            leftConnector: false,
+          ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: true,
             connections: [
-              ForkConnection(topY: y_r32[0], bottomY: y_r32[1], childY: y_r16[0]),
-              ForkConnection(topY: y_r32[2], bottomY: y_r32[3], childY: y_r16[1]),
+              ForkConnection(
+                topY: y_r32[0],
+                bottomY: y_r32[1],
+                childY: y_r16[0],
+              ),
+              ForkConnection(
+                topY: y_r32[2],
+                bottomY: y_r32[3],
+                childY: y_r16[1],
+              ),
             ],
           ),
 
           // ── Round of 16 (Left) ────────────────────────────────
-          _buildRoundColumn(context, 'ROUND OF 16', [r16[0], r16[1]], colWidth, spacing_r16, isDark, topPad: topPad_r16),
+          _buildRoundColumn(
+            context,
+            'ROUND OF 16',
+            [r16[0], r16[1]],
+            colWidth,
+            spacing_r16,
+            isDark,
+            topPad: topPad_r16,
+          ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: true,
             connections: [
-              ForkConnection(topY: y_r16[0], bottomY: y_r16[1], childY: y_qf[0]),
+              ForkConnection(
+                topY: y_r16[0],
+                bottomY: y_r16[1],
+                childY: y_qf[0],
+              ),
             ],
           ),
 
           // ── Quarter Finals (Left) ─────────────────────────────
-          _buildRoundColumn(context, 'QUARTER FINALS', [qf[0]], colWidth, matchH * 4 + 30, isDark, topPad: topPad_qf),
+          _buildRoundColumn(
+            context,
+            'QUARTER FINALS',
+            [qf[0]],
+            colWidth,
+            matchH * 4 + 30,
+            isDark,
+            topPad: topPad_qf,
+          ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: true,
@@ -127,7 +225,13 @@ class BracketScreen extends StatelessWidget {
             children: [
               _buildRoundLabel(context, 'SEMI FINALS'),
               const SizedBox(height: topPad_sf),
-              _buildMatchCard(context, sf[0], colWidth, isDark, accent: const Color(0xFFFFD700)),
+              _buildMatchCard(
+                context,
+                sf[0],
+                colWidth,
+                isDark,
+                accent: const Color(0xFFFFD700),
+              ),
               const SizedBox(height: 40),
               _buildThirdPlaceCard(context, tp, colWidth, isDark),
             ],
@@ -149,7 +253,14 @@ class BracketScreen extends StatelessWidget {
               const SizedBox(height: topPad_final - 76),
               _buildChampionshipTrophyBanner(context, fin, isDark),
               const SizedBox(height: 12),
-              _buildMatchCard(context, fin, colWidth + 20, isDark, accent: Colors.amber, isHighlight: true),
+              _buildMatchCard(
+                context,
+                fin,
+                colWidth + 20,
+                isDark,
+                accent: Colors.amber,
+                isHighlight: true,
+              ),
             ],
           ),
           _buildConnectorColumn(
@@ -166,7 +277,13 @@ class BracketScreen extends StatelessWidget {
             children: [
               _buildRoundLabel(context, 'SEMI FINALS'),
               const SizedBox(height: topPad_sf),
-              _buildMatchCard(context, sf[1], colWidth, isDark, accent: const Color(0xFFFFD700)),
+              _buildMatchCard(
+                context,
+                sf[1],
+                colWidth,
+                isDark,
+                accent: const Color(0xFFFFD700),
+              ),
             ],
           ),
           _buildConnectorColumn(
@@ -179,28 +296,64 @@ class BracketScreen extends StatelessWidget {
           ),
 
           // ── Quarter Finals (Right) ────────────────────────────
-          _buildRoundColumn(context, 'QUARTER FINALS', [qf[1]], colWidth, matchH * 4 + 30, isDark, topPad: topPad_qf),
+          _buildRoundColumn(
+            context,
+            'QUARTER FINALS',
+            [qf[1]],
+            colWidth,
+            matchH * 4 + 30,
+            isDark,
+            topPad: topPad_qf,
+          ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: false,
             connections: [
-              ForkConnection(topY: y_r16[0], bottomY: y_r16[1], childY: y_qf[0]),
+              ForkConnection(
+                topY: y_r16[0],
+                bottomY: y_r16[1],
+                childY: y_qf[0],
+              ),
             ],
           ),
 
           // ── Round of 16 (Right) ───────────────────────────────
-          _buildRoundColumn(context, 'ROUND OF 16', [r16[2], r16[3]], colWidth, spacing_r16, isDark, topPad: topPad_r16),
+          _buildRoundColumn(
+            context,
+            'ROUND OF 16',
+            [r16[2], r16[3]],
+            colWidth,
+            spacing_r16,
+            isDark,
+            topPad: topPad_r16,
+          ),
           _buildConnectorColumn(
             color: connectorColor,
             isLeftToRight: false,
             connections: [
-              ForkConnection(topY: y_r32[0], bottomY: y_r32[1], childY: y_r16[0]),
-              ForkConnection(topY: y_r32[2], bottomY: y_r32[3], childY: y_r16[1]),
+              ForkConnection(
+                topY: y_r32[0],
+                bottomY: y_r32[1],
+                childY: y_r16[0],
+              ),
+              ForkConnection(
+                topY: y_r32[2],
+                bottomY: y_r32[3],
+                childY: y_r16[1],
+              ),
             ],
           ),
 
           // ── Round of 32 (Right Side) ─────────────────────────
-          _buildRoundColumn(context, 'ROUND OF 32', [r32[4], r32[5], r32[6], r32[7]], colWidth, matchH, isDark, leftConnector: false),
+          _buildRoundColumn(
+            context,
+            'ROUND OF 32',
+            [r32[4], r32[5], r32[6], r32[7]],
+            colWidth,
+            matchH,
+            isDark,
+            leftConnector: false,
+          ),
         ],
       ),
     );
@@ -221,10 +374,12 @@ class BracketScreen extends StatelessWidget {
       children: [
         _buildRoundLabel(context, label),
         SizedBox(height: topPad),
-        ...matches.map((match) => Padding(
-              padding: EdgeInsets.only(bottom: spacing),
-              child: _buildMatchCard(context, match, cardWidth, isDark),
-            )),
+        ...matches.map(
+          (match) => Padding(
+            padding: EdgeInsets.only(bottom: spacing),
+            child: _buildMatchCard(context, match, cardWidth, isDark),
+          ),
+        ),
       ],
     );
   }
@@ -262,7 +417,9 @@ class BracketScreen extends StatelessWidget {
     final settings = Provider.of<SettingsProvider>(context);
 
     // Check if match kickoff time has passed relative to system time
-    final matchDateTime = settings.getRawUtcDateTime(match.date, match.time, null).toLocal();
+    final matchDateTime = settings
+        .getRawUtcDateTime(match.date, match.time, null)
+        .toLocal();
     final isStarted = matchDateTime.isBefore(DateTime.now());
 
     final hasScore = match.homeScore != null && match.awayScore != null;
@@ -299,7 +456,9 @@ class BracketScreen extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 4),
             decoration: BoxDecoration(
-              color: isStarted ? Colors.grey.shade700 : accentColor.withOpacity(0.9),
+              color: isStarted
+                  ? Colors.grey.shade700
+                  : accentColor.withOpacity(0.9),
               borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(13),
                 topRight: Radius.circular(13),
@@ -333,7 +492,9 @@ class BracketScreen extends StatelessWidget {
             thickness: 0.5,
             indent: 12,
             endIndent: 12,
-            color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey.shade200,
+            color: isDark
+                ? Colors.white.withOpacity(0.08)
+                : Colors.grey.shade200,
           ),
 
           // Away team row
@@ -360,12 +521,20 @@ class BracketScreen extends StatelessWidget {
             ),
             child: Row(
               children: [
-                Icon(Icons.calendar_today_outlined, size: 9, color: Colors.grey.shade500),
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 9,
+                  color: Colors.grey.shade500,
+                ),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
                     '${settings.getFormattedRawDate(match.date, match.time, null)} @ ${settings.getFormattedRawTime(match.date, match.time, null)}',
-                    style: TextStyle(fontSize: 8, color: Colors.grey.shade500, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      fontSize: 8,
+                      color: Colors.grey.shade500,
+                      fontWeight: FontWeight.w500,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -386,7 +555,11 @@ class BracketScreen extends StatelessWidget {
     Color accentColor, {
     bool isWinner = false,
   }) {
-    final isTBD = teamName.startsWith('W_') || teamName.startsWith('L_') || teamName.startsWith('W1') || teamName.startsWith('R2');
+    final isTBD =
+        teamName.startsWith('W_') ||
+        teamName.startsWith('L_') ||
+        teamName.startsWith('W1') ||
+        teamName.startsWith('R2');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
@@ -404,24 +577,29 @@ class BracketScreen extends StatelessWidget {
                     color: Colors.black.withOpacity(0.15),
                     blurRadius: 3,
                     offset: const Offset(0, 1),
-                  )
+                  ),
               ],
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
               child: isTBD
                   ? Container(
-                      color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
-                      child: Icon(Icons.help_outline, size: 10, color: Colors.grey.shade400),
+                      color: isDark
+                          ? Colors.white.withOpacity(0.06)
+                          : Colors.grey.shade100,
+                      child: Icon(
+                        Icons.help_outline,
+                        size: 10,
+                        color: Colors.grey.shade400,
+                      ),
                     )
                   : Image.network(
                       TeamLogoHelper.getLogo(teamName),
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) =>
-                          Container(
-                            color: accentColor.withOpacity(0.15),
-                            child: Icon(Icons.flag, size: 10, color: accentColor),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: accentColor.withOpacity(0.15),
+                        child: Icon(Icons.flag, size: 10, color: accentColor),
+                      ),
                     ),
             ),
           ),
@@ -435,8 +613,8 @@ class BracketScreen extends StatelessWidget {
                 color: isTBD
                     ? Colors.grey.shade500
                     : isWinner
-                        ? accentColor
-                        : (isDark ? Colors.white : Colors.black87),
+                    ? accentColor
+                    : (isDark ? Colors.white : Colors.black87),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -460,7 +638,12 @@ class BracketScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildThirdPlaceCard(BuildContext context, BracketMatchModel match, double width, bool isDark) {
+  Widget _buildThirdPlaceCard(
+    BuildContext context,
+    BracketMatchModel match,
+    double width,
+    bool isDark,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -514,10 +697,19 @@ class BracketScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildChampionshipTrophyBanner(BuildContext context, BracketMatchModel finalMatch, bool isDark) {
-    final hasWinner = finalMatch.homeScore != null && finalMatch.awayScore != null && finalMatch.homeScore != finalMatch.awayScore;
-    final championName = hasWinner 
-        ? (finalMatch.homeScore! > finalMatch.awayScore! ? finalMatch.home : finalMatch.away)
+  Widget _buildChampionshipTrophyBanner(
+    BuildContext context,
+    BracketMatchModel finalMatch,
+    bool isDark,
+  ) {
+    final hasWinner =
+        finalMatch.homeScore != null &&
+        finalMatch.awayScore != null &&
+        finalMatch.homeScore != finalMatch.awayScore;
+    final championName = hasWinner
+        ? (finalMatch.homeScore! > finalMatch.awayScore!
+              ? finalMatch.home
+              : finalMatch.away)
         : null;
 
     return Container(
@@ -547,11 +739,15 @@ class BracketScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.emoji_events, 
-            size: 32, 
-            color: Colors.white, 
+            Icons.emoji_events,
+            size: 32,
+            color: Colors.white,
             shadows: [
-              Shadow(color: Colors.black.withOpacity(0.35), blurRadius: 4, offset: const Offset(0, 2))
+              Shadow(
+                color: Colors.black.withOpacity(0.35),
+                blurRadius: 4,
+                offset: const Offset(0, 2),
+              ),
             ],
           ),
           const SizedBox(height: 4),
@@ -610,11 +806,16 @@ class BracketScreen extends StatelessWidget {
   }
 
   String _formatTBDLabel(String raw) {
-    if (raw.startsWith('W_R32_')) return 'Winner M${raw.replaceAll('W_R32_', '')}';
-    if (raw.startsWith('W_R16_')) return 'Winner R16 M${raw.replaceAll('W_R16_', '')}';
-    if (raw.startsWith('W_QF_')) return 'Winner QF${raw.replaceAll('W_QF_', '')}';
-    if (raw.startsWith('W_SF_')) return 'Winner SF${raw.replaceAll('W_SF_', '')}';
-    if (raw.startsWith('L_SF_')) return 'Loser SF${raw.replaceAll('L_SF_', '')}';
+    if (raw.startsWith('W_R32_'))
+      return 'Winner M${raw.replaceAll('W_R32_', '')}';
+    if (raw.startsWith('W_R16_'))
+      return 'Winner R16 M${raw.replaceAll('W_R16_', '')}';
+    if (raw.startsWith('W_QF_'))
+      return 'Winner QF${raw.replaceAll('W_QF_', '')}';
+    if (raw.startsWith('W_SF_'))
+      return 'Winner SF${raw.replaceAll('W_SF_', '')}';
+    if (raw.startsWith('L_SF_'))
+      return 'Loser SF${raw.replaceAll('L_SF_', '')}';
     if (raw.startsWith('W1')) return 'Winner Group ${raw.substring(2)}';
     if (raw.startsWith('R2')) return 'Runner-up ${raw.substring(2)}';
     return 'TBD';
@@ -639,10 +840,7 @@ class StraightConnection {
   final double parentY;
   final double childY;
 
-  StraightConnection({
-    required this.parentY,
-    required this.childY,
-  });
+  StraightConnection({required this.parentY, required this.childY});
 }
 
 // ── BRACKET CONNECTOR CUSTOM PAINTER ──────────────────────────────────────
@@ -678,7 +876,7 @@ class RoundConnectorPainter extends CustomPainter {
         // Curve from parent top card to child
         path.moveTo(0, conn.topY);
         path.cubicTo(midX, conn.topY, midX, conn.childY, w, conn.childY);
-        
+
         // Curve from parent bottom card to child
         path.moveTo(0, conn.bottomY);
         path.cubicTo(midX, conn.bottomY, midX, conn.childY, w, conn.childY);
@@ -686,7 +884,7 @@ class RoundConnectorPainter extends CustomPainter {
         // Right to left smooth curves
         path.moveTo(w, conn.topY);
         path.cubicTo(midX, conn.topY, midX, conn.childY, 0, conn.childY);
-        
+
         path.moveTo(w, conn.bottomY);
         path.cubicTo(midX, conn.bottomY, midX, conn.childY, 0, conn.childY);
       }
@@ -709,9 +907,9 @@ class RoundConnectorPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant RoundConnectorPainter oldDelegate) {
     return oldDelegate.color != color ||
-           oldDelegate.connections.length != connections.length ||
-           oldDelegate.straightConnections.length != straightConnections.length ||
-           oldDelegate.isLeftToRight != isLeftToRight;
+        oldDelegate.connections.length != connections.length ||
+        oldDelegate.straightConnections.length != straightConnections.length ||
+        oldDelegate.isLeftToRight != isLeftToRight;
   }
 }
 
@@ -725,8 +923,8 @@ class PitchBackdropPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = isDark 
-          ? Colors.white.withOpacity(0.015) 
+      ..color = isDark
+          ? Colors.white.withOpacity(0.015)
           : Colors.black.withOpacity(0.01)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
@@ -743,7 +941,7 @@ class PitchBackdropPainter extends CustomPainter {
 
     // Draw center circle
     canvas.drawCircle(Offset(w * 0.5, h * 0.5), 80, paint);
-    
+
     // Center point
     final pointPaint = Paint()
       ..color = paint.color
@@ -765,5 +963,3 @@ class PitchBackdropPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
-
-

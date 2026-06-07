@@ -1,4 +1,6 @@
+import 'package:fifa/common/admob_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../models/team_model.dart';
 import '../models/match_model.dart';
@@ -20,18 +22,35 @@ class TeamDetailsScreen extends StatefulWidget {
   State<TeamDetailsScreen> createState() => _TeamDetailsScreenState();
 }
 
-class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTickerProviderStateMixin {
+class _TeamDetailsScreenState extends State<TeamDetailsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
+  BannerAd? _bannerAd;
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    AdmobHelper.loadInterstitialAd();
+    // ⚠️ delay banner load (important)
+    Future.delayed(const Duration(seconds: 1), () async {
+      if (!mounted) return;
+
+      final width = MediaQuery.of(context).size.width.toInt();
+      final ad = await AdmobHelper.loadBannerAd(
+        size: AdSize(width: width - 35, height: 100),
+      );
+      if (!mounted) return;
+
+      setState(() {
+        _bannerAd = ad;
+      });
+    });
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
 
@@ -44,19 +63,41 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
 
     // Find the TeamModel if it exists in provider to get group
     final TeamModel? teamInfo = teamProvider.teams.firstWhere(
-      (t) => t.name.toLowerCase().trim() == widget.teamName.toLowerCase().trim(),
-      orElse: () => TeamModel(id: 0, name: widget.teamName, logo: '', group: 'A'),
+      (t) =>
+          t.name.toLowerCase().trim() == widget.teamName.toLowerCase().trim(),
+      orElse: () =>
+          TeamModel(id: 0, name: widget.teamName, logo: '', group: 'A'),
     );
 
     // Fetch players and fixtures
     final players = teamProvider.getPlayersForTeam(widget.teamName);
-    final fixtures = matchProvider.matches.where((match) =>
-        match.homeTeam.toLowerCase().trim() == widget.teamName.toLowerCase().trim() ||
-        match.awayTeam.toLowerCase().trim() == widget.teamName.toLowerCase().trim()).toList();
+    final fixtures = matchProvider.matches
+        .where(
+          (match) =>
+              match.homeTeam.toLowerCase().trim() ==
+                  widget.teamName.toLowerCase().trim() ||
+              match.awayTeam.toLowerCase().trim() ==
+                  widget.teamName.toLowerCase().trim(),
+        )
+        .toList();
 
     final history = FifaHistoryService.getHistory(widget.teamName);
 
     return Scaffold(
+      bottomNavigationBar: _bannerAd == null
+          ? const SizedBox.shrink()
+          : Container(
+              width: double.infinity,
+              // Set a fixed height for a balanced appearance across devices
+              height: 80,
+              alignment: Alignment.center,
+              // Use a subtle background to blend with the app theme
+              color: Colors.black.withOpacity(0.2),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: AdWidget(ad: _bannerAd!),
+              ),
+            ),
       body: NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
@@ -76,8 +117,12 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            isDark ? const Color(0xFF020617) : primaryColor.withBlue(100),
-                            isDark ? const Color(0xFF0F172A).withOpacity(0.8) : primaryColor.withOpacity(0.9),
+                            isDark
+                                ? const Color(0xFF020617)
+                                : primaryColor.withBlue(100),
+                            isDark
+                                ? const Color(0xFF0F172A).withOpacity(0.8)
+                                : primaryColor.withOpacity(0.9),
                           ],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
@@ -98,7 +143,7 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                                   color: Colors.black.withOpacity(0.35),
                                   blurRadius: 16,
                                   offset: const Offset(0, 8),
-                                )
+                                ),
                               ],
                             ),
                             child: ClipOval(
@@ -108,7 +153,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                                 height: 76,
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) =>
-                                    const CircleAvatar(radius: 38, child: Icon(Icons.flag, size: 36)),
+                                    const CircleAvatar(
+                                      radius: 38,
+                                      child: Icon(Icons.flag, size: 36),
+                                    ),
                               ),
                             ),
                           ),
@@ -124,7 +172,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                           ),
                           const SizedBox(height: 4),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.18),
                               borderRadius: BorderRadius.circular(20),
@@ -152,15 +203,30 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                 TabBar(
                   controller: _tabController,
                   labelColor: primaryColor,
-                  unselectedLabelColor: isDark ? Colors.grey : Colors.grey.shade600,
+                  unselectedLabelColor: isDark
+                      ? Colors.grey
+                      : Colors.grey.shade600,
                   indicatorColor: primaryColor,
                   indicatorSize: TabBarIndicatorSize.tab,
                   indicatorWeight: 3.0,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+                  labelStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    letterSpacing: 0.5,
+                  ),
                   tabs: const [
-                    Tab(text: 'SQUAD', icon: Icon(Icons.people_outline, size: 20)),
-                    Tab(text: 'FIXTURES', icon: Icon(Icons.sports_soccer_outlined, size: 20)),
-                    Tab(text: 'HISTORY', icon: Icon(Icons.emoji_events_outlined, size: 20)),
+                    Tab(
+                      text: 'SQUAD',
+                      icon: Icon(Icons.people_outline, size: 20),
+                    ),
+                    Tab(
+                      text: 'FIXTURES',
+                      icon: Icon(Icons.sports_soccer_outlined, size: 20),
+                    ),
+                    Tab(
+                      text: 'HISTORY',
+                      icon: Icon(Icons.emoji_events_outlined, size: 20),
+                    ),
                   ],
                 ),
                 isDark,
@@ -181,13 +247,21 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
   }
 
   // --- SQUAD ROSTER TAB ---
-  Widget _buildSquadTab(List<PlayerModel> players, bool isDark, Color primaryColor) {
+  Widget _buildSquadTab(
+    List<PlayerModel> players,
+    bool isDark,
+    Color primaryColor,
+  ) {
     if (players.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people_alt_outlined, size: 64, color: Colors.grey.shade400),
+            Icon(
+              Icons.people_alt_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
             const SizedBox(height: 12),
             const Text(
               'No squad data available',
@@ -199,23 +273,40 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
     }
 
     // Group players by position
-    final gks = players.where((p) => p.position.toLowerCase() == 'goalkeeper').toList();
-    final dfs = players.where((p) => p.position.toLowerCase() == 'defender').toList();
-    final mfs = players.where((p) => p.position.toLowerCase() == 'midfielder').toList();
-    final fws = players.where((p) => p.position.toLowerCase() == 'forward').toList();
+    final gks = players
+        .where((p) => p.position.toLowerCase() == 'goalkeeper')
+        .toList();
+    final dfs = players
+        .where((p) => p.position.toLowerCase() == 'defender')
+        .toList();
+    final mfs = players
+        .where((p) => p.position.toLowerCase() == 'midfielder')
+        .toList();
+    final fws = players
+        .where((p) => p.position.toLowerCase() == 'forward')
+        .toList();
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       children: [
-        if (gks.isNotEmpty) _buildPositionSection('GOALKEEPERS', gks, Colors.purple, isDark),
-        if (dfs.isNotEmpty) _buildPositionSection('DEFENDERS', dfs, Colors.green, isDark),
-        if (mfs.isNotEmpty) _buildPositionSection('MIDFIELDERS', mfs, Colors.blue, isDark),
-        if (fws.isNotEmpty) _buildPositionSection('FORWARDS', fws, Colors.amber, isDark),
+        if (gks.isNotEmpty)
+          _buildPositionSection('GOALKEEPERS', gks, Colors.purple, isDark),
+        if (dfs.isNotEmpty)
+          _buildPositionSection('DEFENDERS', dfs, Colors.green, isDark),
+        if (mfs.isNotEmpty)
+          _buildPositionSection('MIDFIELDERS', mfs, Colors.blue, isDark),
+        if (fws.isNotEmpty)
+          _buildPositionSection('FORWARDS', fws, Colors.amber, isDark),
       ],
     );
   }
 
-  Widget _buildPositionSection(String title, List<PlayerModel> list, Color accentColor, bool isDark) {
+  Widget _buildPositionSection(
+    String title,
+    List<PlayerModel> list,
+    Color accentColor,
+    bool isDark,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -226,7 +317,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(shape: BoxShape.circle, color: accentColor),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: accentColor,
+                ),
               ),
               const SizedBox(width: 8),
               Text(
@@ -254,7 +348,9 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
                 side: BorderSide(
-                  color: isDark ? Colors.white.withOpacity(0.06) : Colors.grey.shade100,
+                  color: isDark
+                      ? Colors.white.withOpacity(0.06)
+                      : Colors.grey.shade100,
                   width: 1,
                 ),
               ),
@@ -263,13 +359,19 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                 onTap: () {
                   _showPlayerBiography(context, player, accentColor);
                 },
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 leading: Container(
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: accentColor.withOpacity(0.35), width: 1.5),
+                    border: Border.all(
+                      color: accentColor.withOpacity(0.35),
+                      width: 1.5,
+                    ),
                   ),
                   child: ClipOval(
                     child: Image.network(
@@ -280,14 +382,21 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                       errorBuilder: (context, error, stackTrace) =>
                           CircleAvatar(
                             backgroundColor: accentColor.withOpacity(0.12),
-                            child: Icon(Icons.person, color: accentColor, size: 20),
+                            child: Icon(
+                              Icons.person,
+                              color: accentColor,
+                              size: 20,
+                            ),
                           ),
                     ),
                   ),
                 ),
                 title: Text(
                   player.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
                 subtitle: Text(
                   '#${player.number} • ${player.position}',
@@ -298,11 +407,17 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                   ),
                 ),
                 trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: accentColor.withOpacity(0.08),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: accentColor.withOpacity(0.2), width: 0.8),
+                    border: Border.all(
+                      color: accentColor.withOpacity(0.2),
+                      width: 0.8,
+                    ),
                   ),
                   child: Text(
                     _getPositionShort(player.position),
@@ -322,7 +437,11 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
     );
   }
 
-  void _showPlayerBiography(BuildContext context, PlayerModel player, Color accentColor) {
+  void _showPlayerBiography(
+    BuildContext context,
+    PlayerModel player,
+    Color accentColor,
+  ) {
     final history = PlayerHistoryService.getPlayerHistory(
       player.name,
       player.teamName,
@@ -354,7 +473,7 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                 color: Colors.black.withOpacity(0.15),
                 blurRadius: 20,
                 offset: const Offset(0, -4),
-              )
+              ),
             ],
           ),
           padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + bottomPadding),
@@ -364,232 +483,266 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              // Sliding handlebar
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4.5,
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.white.withOpacity(0.15) : Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Player Top profile banner
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Layered Player Photo Avatar
-                  Container(
-                    width: 56,
-                    height: 56,
+                // Sliding handlebar
+                Center(
+                  child: Container(
+                    width: 40,
+                    height: 4.5,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: accentColor, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          color: accentColor.withOpacity(0.25),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
-                        )
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image.network(
-                        PlayerPhotoHelper.getPlayerPhoto(player.name),
-                        width: 56,
-                        height: 56,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            CircleAvatar(
-                              backgroundColor: accentColor.withOpacity(0.12),
-                              child: Icon(Icons.person, color: accentColor, size: 28),
-                            ),
-                      ),
+                      color: isDark
+                          ? Colors.white.withOpacity(0.15)
+                          : Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                player.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 18,
-                                  letterSpacing: 0.2,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: accentColor.withOpacity(0.12),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                '#${player.number}',
-                                style: TextStyle(
-                                  color: accentColor,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 11,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Row(
-                          children: [
-                            ClipOval(
-                              child: Image.network(
-                                TeamLogoHelper.getLogo(player.teamName),
-                                width: 18,
-                                height: 18,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    const Icon(Icons.flag, size: 14, color: Colors.grey),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            Text(
-                              player.teamName,
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Position Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: accentColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: accentColor.withOpacity(0.2), width: 0.8),
-                    ),
-                    child: Text(
-                      player.position.toUpperCase(),
-                      style: TextStyle(
-                        color: accentColor,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              const Divider(height: 1, thickness: 0.8),
-              const SizedBox(height: 20),
-
-              // Club Info
-              Row(
-                children: [
-                  const Icon(Icons.business_center, color: Colors.grey, size: 20),
-                  const SizedBox(width: 10),
-                  const Text(
-                    'CURRENT CLUB: ',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12,
-                      color: Colors.grey,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  Text(
-                    history.club,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              // Player Biography
-              Text(
-                'BIOGRAPHY & CAREER STATS',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 11,
-                  color: primaryColor,
-                  letterSpacing: 0.5,
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                history.bio,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
-                  height: 1.45,
-                ),
-              ),
-              const SizedBox(height: 20),
+                const SizedBox(height: 20),
 
-              // Key achievements
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.amber.withOpacity(0.06),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.amber.withOpacity(0.15), width: 1),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                // Player Top profile banner
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Icon(Icons.emoji_events, color: Colors.amber.shade700, size: 20),
-                        const SizedBox(width: 8),
-                        Text(
-                          'HONOURS & ACHIEVEMENTS',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            color: Colors.amber.shade800,
-                            fontSize: 11,
-                            letterSpacing: 0.5,
+                    // Layered Player Photo Avatar
+                    Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: accentColor, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withOpacity(0.25),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
                           ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.network(
+                          PlayerPhotoHelper.getPlayerPhoto(player.name),
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              CircleAvatar(
+                                backgroundColor: accentColor.withOpacity(0.12),
+                                child: Icon(
+                                  Icons.person,
+                                  color: accentColor,
+                                  size: 28,
+                                ),
+                              ),
                         ),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      history.achievements,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? Colors.grey.shade200 : Colors.grey.shade800,
-                        fontWeight: FontWeight.w600,
-                        height: 1.4,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  player.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 18,
+                                    letterSpacing: 0.2,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 3,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: accentColor.withOpacity(0.12),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  '#${player.number}',
+                                  style: TextStyle(
+                                    color: accentColor,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              ClipOval(
+                                child: Image.network(
+                                  TeamLogoHelper.getLogo(player.teamName),
+                                  width: 18,
+                                  height: 18,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(
+                                        Icons.flag,
+                                        size: 14,
+                                        color: Colors.grey,
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                player.teamName,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark
+                                      ? Colors.grey.shade400
+                                      : Colors.grey.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Position Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: accentColor.withOpacity(0.2),
+                          width: 0.8,
+                        ),
+                      ),
+                      child: Text(
+                        player.position.toUpperCase(),
+                        style: TextStyle(
+                          color: accentColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                const Divider(height: 1, thickness: 0.8),
+                const SizedBox(height: 20),
+
+                // Club Info
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.business_center,
+                      color: Colors.grey,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 10),
+                    const Text(
+                      'CURRENT CLUB: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.grey,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    Text(
+                      history.club,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Player Biography
+                Text(
+                  'BIOGRAPHY & CAREER STATS',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    color: primaryColor,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  history.bio,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isDark ? Colors.grey.shade300 : Colors.grey.shade800,
+                    height: 1.45,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                // Key achievements
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.withOpacity(0.06),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: Colors.amber.withOpacity(0.15),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.emoji_events,
+                            color: Colors.amber.shade700,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'HONOURS & ACHIEVEMENTS',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              color: Colors.amber.shade800,
+                              fontSize: 11,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        history.achievements,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: isDark
+                              ? Colors.grey.shade200
+                              : Colors.grey.shade800,
+                          fontWeight: FontWeight.w600,
+                          height: 1.4,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-      );
-    },
-  );
-}
+        );
+      },
+    );
+  }
 
   String _getPositionShort(String position) {
     switch (position.toLowerCase()) {
@@ -634,13 +787,21 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
   }
 
   // --- FIFA HISTORY TAB ---
-  Widget _buildHistoryTab(FifaHistoryModel? history, bool isDark, Color primaryColor) {
+  Widget _buildHistoryTab(
+    FifaHistoryModel? history,
+    bool isDark,
+    Color primaryColor,
+  ) {
     if (history == null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.emoji_events_outlined, size: 64, color: Colors.grey.shade400),
+            Icon(
+              Icons.emoji_events_outlined,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
             const SizedBox(height: 12),
             const Text(
               'No tournament statistics available',
@@ -671,7 +832,8 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: (history.titlesCount > 0 ? Colors.amber : primaryColor).withOpacity(0.35),
+                  color: (history.titlesCount > 0 ? Colors.amber : primaryColor)
+                      .withOpacity(0.35),
                   blurRadius: 12,
                   offset: const Offset(0, 6),
                 ),
@@ -684,7 +846,9 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        history.titlesCount > 0 ? 'WORLD CUP CHAMPIONS' : 'COMPETING NATION',
+                        history.titlesCount > 0
+                            ? 'WORLD CUP CHAMPIONS'
+                            : 'COMPETING NATION',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 10,
@@ -720,7 +884,9 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
                 Icon(
                   Icons.emoji_events,
                   size: 64,
-                  color: history.titlesCount > 0 ? Colors.white : Colors.white.withOpacity(0.55),
+                  color: history.titlesCount > 0
+                      ? Colors.white
+                      : Colors.white.withOpacity(0.55),
                 ),
               ],
             ),
@@ -728,11 +894,26 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
           const SizedBox(height: 24),
 
           // Statistics rows
-          _buildInfoRow('BEST WORLD CUP FINISH', history.bestFinish, Icons.military_tech, isDark),
+          _buildInfoRow(
+            'BEST WORLD CUP FINISH',
+            history.bestFinish,
+            Icons.military_tech,
+            isDark,
+          ),
           const SizedBox(height: 16),
-          _buildInfoRow('TOURNAMENT APPEARANCES', history.appearanceCount, Icons.calendar_today, isDark),
+          _buildInfoRow(
+            'TOURNAMENT APPEARANCES',
+            history.appearanceCount,
+            Icons.calendar_today,
+            isDark,
+          ),
           const SizedBox(height: 16),
-          _buildInfoRow('LEGENDARY PLAYERS', history.legends, Icons.stars, isDark),
+          _buildInfoRow(
+            'LEGENDARY PLAYERS',
+            history.legends,
+            Icons.stars,
+            isDark,
+          ),
           const SizedBox(height: 24),
 
           const Divider(height: 1, thickness: 0.8),
@@ -744,7 +925,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
             decoration: BoxDecoration(
               color: Colors.blueAccent.withOpacity(0.06),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.blueAccent.withOpacity(0.12), width: 1),
+              border: Border.all(
+                color: Colors.blueAccent.withOpacity(0.12),
+                width: 1,
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -789,7 +973,9 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey.shade100,
+            color: isDark
+                ? Colors.white.withOpacity(0.05)
+                : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, size: 20, color: Colors.grey),
@@ -811,7 +997,10 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen> with SingleTicker
               const SizedBox(height: 4),
               Text(
                 value,
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -834,7 +1023,11 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   double get maxExtent => _tabBar.preferredSize.height;
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
     return Container(
       color: isDark ? const Color(0xFF0F172A) : Colors.white,
       child: _tabBar,
