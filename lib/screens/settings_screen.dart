@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../presentation/widgets/purchase_popup.dart';
@@ -13,39 +14,35 @@ class SettingsScreen extends StatelessWidget {
     final primaryColor = Theme.of(context).primaryColor;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-      ),
+      appBar: AppBar(title: const Text('Settings')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Title
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-                child: Text(
-                  'TIMEZONE SETTINGS',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    color: isDark ? Colors.grey : Colors.grey.shade700,
-                  ),
-                ),
+              _buildSectionHeader(
+                context: context,
+                icon: Icons.access_time,
+                title: 'Time Zone',
+                subtitle: 'Choose how match times are displayed',
+                isDark: isDark,
               ),
+              const SizedBox(height: 12),
 
               // Timezone Mode Selection Card
               Card(
                 elevation: isDark ? 4 : 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: Column(
                   children: [
                     _buildRadioListTile(
                       context: context,
-                      title: 'My Timezone (Device Time)',
-                      subtitle: 'Automatically convert match times to your device local country time.',
+                      title: 'My Timezone (${DateTime.now().timeZoneName})',
+                      subtitle:
+                          'Automatically convert match times to your device local time (${DateTime.now().timeZoneName}).',
                       value: TimezoneMode.device,
                       groupValue: settingsProvider.timezoneMode,
                       icon: Icons.phonelink_setup,
@@ -57,7 +54,8 @@ class SettingsScreen extends StatelessWidget {
                     _buildRadioListTile(
                       context: context,
                       title: 'Stadium Time (Venue Local)',
-                      subtitle: 'Show the scheduled time local to the stadium hosting the match in USA/Canada/Mexico.',
+                      subtitle:
+                          'Show the scheduled time local to the stadium hosting the match in USA/Canada/Mexico.',
                       value: TimezoneMode.stadium,
                       groupValue: settingsProvider.timezoneMode,
                       icon: Icons.stadium_outlined,
@@ -95,22 +93,30 @@ class SettingsScreen extends StatelessWidget {
 
               // Custom Offset Selection (visible only when custom is chosen)
               if (settingsProvider.timezoneMode == TimezoneMode.custom) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 12),
                 Card(
                   elevation: isDark ? 4 : 2,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 12.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           children: [
                             Icon(Icons.access_time_filled, color: primaryColor),
-                      SizedBox(width: 12),
+                            const SizedBox(width: 12),
                             const Text(
                               'Select GMT Offset',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
                           ],
                         ),
@@ -120,10 +126,17 @@ class SettingsScreen extends StatelessWidget {
                           children: [
                             Text(
                               'Offset:',
-                              style: TextStyle(color: isDark ? Colors.grey : Colors.grey.shade700),
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.grey
+                                    : Colors.grey.shade700,
+                              ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
                                 color: primaryColor.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(8),
@@ -143,7 +156,8 @@ class SettingsScreen extends StatelessWidget {
                           max: 14,
                           divisions: 26,
                           activeColor: primaryColor,
-                          label: 'GMT ${settingsProvider.customOffsetHours >= 0 ? '+' : ''}${settingsProvider.customOffsetHours}',
+                          label:
+                              'GMT ${settingsProvider.customOffsetHours >= 0 ? '+' : ''}${settingsProvider.customOffsetHours}',
                           value: settingsProvider.customOffsetHours.toDouble(),
                           onChanged: (val) {
                             settingsProvider.setCustomOffset(val.round());
@@ -155,22 +169,23 @@ class SettingsScreen extends StatelessWidget {
                 ),
               ],
 
-              const SizedBox(height: 24),
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, bottom: 12.0),
-                child: Text(
-                  'SUPPORT & PREMIUM',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                    color: isDark ? Colors.grey : Colors.grey.shade700,
-                  ),
-                ),
+              const SizedBox(height: 28),
+
+              _buildSectionHeader(
+                context: context,
+                icon: Icons.workspace_premium,
+                title: 'Support & Premium',
+                subtitle: 'Remove ads and get help',
+                isDark: isDark,
               ),
+              const SizedBox(height: 12),
+
+              // Remove Ads Card
               Card(
                 elevation: isDark ? 4 : 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
                 child: InkWell(
                   borderRadius: BorderRadius.circular(16),
                   onTap: () async {
@@ -209,7 +224,9 @@ class SettingsScreen extends StatelessWidget {
                                 'Subscribe to remove all ads and enjoy an ad-free experience.',
                                 style: TextStyle(
                                   fontSize: 12,
-                                  color: isDark ? Colors.grey : Colors.grey.shade600,
+                                  color: isDark
+                                      ? Colors.grey
+                                      : Colors.grey.shade600,
                                 ),
                               ),
                             ],
@@ -225,41 +242,203 @@ class SettingsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 12),
+
+              // Contact Support Card
               Card(
-                color: primaryColor.withValues(alpha: 0.08),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.info_outline, color: Colors.blueAccent, size: 22),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Match Kickoffs & Countdown',
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Changing these options shifts the dates & times shown for all matches in the home page, schedule lists, details, and brackets. Your ticking countdown timers will stay 100% accurate as they calculate the time left in your absolute local timezone.',
-                              style: TextStyle(fontSize: 12, color: Colors.grey, height: 1.3),
-                            ),
-                          ],
+                elevation: isDark ? 4 : 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(16),
+                  onTap: () async {
+                    await Clipboard.setData(
+                      const ClipboardData(text: 'andsayem@gmail.com'),
+                    );
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Email copied to clipboard'),
                         ),
-                      )
-                    ],
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.mail_outline,
+                            color: Colors.blue,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Contact Support',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'andsayem@gmail.com',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? Colors.grey
+                                      : Colors.grey.shade600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: isDark ? Colors.grey : Colors.grey.shade400,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              )
+              ),
+
+              const SizedBox(height: 28),
+
+              // Info Card
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border(
+                    left: BorderSide(color: Colors.blueAccent, width: 3),
+                  ),
+                  color: isDark
+                      ? Colors.blueAccent.withValues(alpha: 0.08)
+                      : Colors.blue.withValues(alpha: 0.06),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.info_outline,
+                      color: Colors.blueAccent,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Match Kickoffs & Countdown',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: isDark ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Changing these options shifts the dates & times shown for all matches in the home page, schedule lists, details, and brackets. Your ticking countdown timers will stay 100% accurate as they calculate the time left in your absolute local timezone.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: isDark
+                                  ? Colors.grey.shade300
+                                  : Colors.grey.shade700,
+                              height: 1.4,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required bool isDark,
+  }) {
+    final primaryColor = Theme.of(context).primaryColor;
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                primaryColor.withValues(alpha: 0.15),
+                primaryColor.withValues(alpha: 0.05),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, size: 20, color: primaryColor),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: isDark ? Colors.grey : Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          height: 1,
+          width: 40,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                primaryColor.withValues(alpha: 0.3),
+                primaryColor.withValues(alpha: 0.0),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -275,48 +454,88 @@ class SettingsScreen extends StatelessWidget {
     final primaryColor = Theme.of(context).primaryColor;
     final isSelected = value == groupValue;
 
-    return InkWell(
-      onTap: () => onChanged(value),
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-        child: Row(
-          children: [
-            Icon(
-              isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-              color: isSelected ? primaryColor : Colors.grey,
-              size: 22,
-            ),
-            const SizedBox(width: 4),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(icon, size: 22, color: isSelected ? primaryColor : Colors.grey),
-                      const SizedBox(width: 12),
-                      Text(
-                        title,
+    return Container(
+      decoration: BoxDecoration(
+        color: isSelected
+            ? primaryColor.withValues(alpha: 0.06)
+            : null,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      child: InkWell(
+        onTap: () => onChanged(value),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected ? primaryColor : Colors.grey.shade400,
+                    width: 2,
+                  ),
+                ),
+                child: isSelected
+                    ? Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: primaryColor,
+                        ),
+                      )
+                    : const SizedBox(width: 10, height: 10),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          icon,
+                          size: 20,
+                          color: isSelected ? primaryColor : Colors.grey.shade500,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                            color: isSelected
+                                ? (Theme.of(context).brightness == Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black87)
+                                : Colors.grey.shade600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      padding: const EdgeInsets.only(left: 30.0),
+                      child: Text(
+                        subtitle,
                         style: TextStyle(
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          fontSize: 15,
+                          fontSize: 11,
+                          height: 1.3,
+                          color: isSelected
+                              ? Colors.grey.shade500
+                              : Colors.grey.shade400,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 2),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 34.0),
-                    child: Text(
-                      subtitle,
-                      style: const TextStyle(fontSize: 12, height: 1.2),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
