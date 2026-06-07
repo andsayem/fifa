@@ -28,7 +28,7 @@ class MatchCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {
-          AdmobHelper.showInterstitialAd();
+          // AdmobHelper.showInterstitialAd();
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -69,7 +69,7 @@ class MatchCard extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(12),
                       onTap: () {
-                        AdmobHelper.showInterstitialAd();
+                        //AdmobHelper.showInterstitialAd();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
