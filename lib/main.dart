@@ -13,7 +13,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-    await MobileAds.instance.initialize();
+  await MobileAds.instance.initialize();
   runApp(const MyApp());
   // runApp duplicate removed
 }
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
       child: GetMaterialApp(
-        title: 'FIFA 2026 Match Shedule',
+        title: 'World Cup 2026 Match Shedule',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,
         darkTheme: AppTheme.darkTheme,

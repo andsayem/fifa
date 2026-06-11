@@ -52,7 +52,7 @@ class _HomeScreenState extends State<HomeScreen> {
         size: AdSize(width: width - 27, height: 220),
       );
       if (!mounted || _purchaseController.adsRemoved.value) {
-        banner?.dispose();
+        banner.dispose();
         return;
       }
       setState(() {
@@ -85,7 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   : Colors.white,
             ),
             const SizedBox(width: 8),
-            const Text('FIFA 2026', style: TextStyle(letterSpacing: 0.5)),
+            const Text(
+              'World Cup 2026 Match Shedule',
+              style: TextStyle(letterSpacing: 0.5),
+            ),
           ],
         ),
         actions: [
@@ -129,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       return _buildSubscribeBanner(context);
                     }),
 
-                    //_buildLiveTvLink(context),
                     Obx(() {
                       if (_purchaseController.adsRemoved.value ||
                           !_isBannerAdLoaded ||
@@ -216,6 +218,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
             ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: _openLiveTvLink,
+        icon: const Icon(Icons.live_tv),
+        label: const Text('Live TV'),
+        backgroundColor: Colors.red.shade700,
+        foregroundColor: Colors.white,
+      ),
     );
   }
 
@@ -374,14 +383,14 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [primaryColor, primaryColor.withOpacity(0.7)],
+          colors: [primaryColor, primaryColor.withValues(alpha: 0.7)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: primaryColor.withOpacity(0.3),
+            color: primaryColor.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -395,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: const Icon(Icons.block, color: Colors.white, size: 20),
@@ -417,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     'Subscribe for an ad-free experience',
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
+                      color: Colors.white.withValues(alpha: 0.8),
                       fontSize: 11,
                     ),
                   ),
@@ -446,66 +455,52 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildLiveTvLink(BuildContext context) {
-    final primaryColor = Theme.of(context).primaryColor;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: InkWell(
-        onTap: _openLiveTvLink,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          decoration: BoxDecoration(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? const Color(0xFF111827)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Theme.of(context).dividerColor, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.live_tv, color: primaryColor, size: 24),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Live TV',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).textTheme.bodyLarge?.color,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Watch live football coverage at livealltv.com',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Theme.of(context).textTheme.bodySmall?.color,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: primaryColor),
-            ],
-          ),
+  Future<void> _openLiveTvLink() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Icon(Icons.live_tv, color: Theme.of(ctx).primaryColor),
+            const SizedBox(width: 8),
+            const Text('Watch Live TV'),
+          ],
         ),
+        content: const Text(
+          'Watch a quick ad to unlock Live TV access.\nThank you for your support!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(ctx, true),
+            icon: const Icon(Icons.play_circle_outline),
+            label: const Text('Watch Ad'),
+          ),
+        ],
       ),
     );
+
+    if (confirmed != true) return;
+    if (!mounted) return;
+
+    AdmobHelper.showInterstitialAd(
+      onAdDismissed: () {
+        _launchLiveTvUrl();
+      },
+    );
+
+    if (mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Opening Live TV...')));
+    }
   }
 
-  Future<void> _openLiveTvLink() async {
+  Future<void> _launchLiveTvUrl() async {
     final uri = Uri.parse('https://livealltv.com/');
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
       if (mounted) {
@@ -551,7 +546,7 @@ Widget _buildNextMatchCountdownCard(
       ),
       boxShadow: [
         BoxShadow(
-          color: Colors.black.withOpacity(0.2),
+          color: Colors.black.withValues(alpha: 0.2),
           blurRadius: 10,
           offset: const Offset(0, 4),
         ),

@@ -46,7 +46,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
         size: AdSize(width: width - 27, height: 220),
       );
       if (!mounted || _purchaseController.adsRemoved.value) {
-        banner?.dispose();
+        banner.dispose();
         return;
       }
       setState(() {

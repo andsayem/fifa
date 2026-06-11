@@ -58,7 +58,7 @@ class _TeamDetailsScreenState extends State<TeamDetailsScreen>
         size: AdSize(width: width - 35, height: 100),
       );
       if (!mounted || _purchaseController.adsRemoved.value) {
-        ad?.dispose();
+        ad.dispose();
         return;
       }
 
