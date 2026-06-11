@@ -8,7 +8,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
@@ -44,7 +45,8 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
       Navigator.pushReplacement(
         context,
         PageRouteBuilder(
-          pageBuilder: (context, animation, secondaryAnimation) => const MainNavigationShell(),
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const MainNavigationShell(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },
@@ -96,10 +98,17 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: const Color(0xFF10B981).withValues(alpha: 0.08),
-                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.24), width: 1.5),
+                        border: Border.all(
+                          color: const Color(
+                            0xFF10B981,
+                          ).withValues(alpha: 0.24),
+                          width: 1.5,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                            color: const Color(
+                              0xFF10B981,
+                            ).withValues(alpha: 0.15),
                             blurRadius: 30,
                             spreadRadius: 5,
                           ),
@@ -120,7 +129,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                     child: Column(
                       children: [
                         Text(
-                          'FIFA 2026',
+                          'World Cup 2026',
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w900,
@@ -128,7 +137,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                             color: Colors.white,
                             shadows: [
                               Shadow(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                                color: const Color(
+                                  0xFF10B981,
+                                ).withValues(alpha: 0.5),
                                 blurRadius: 10,
                                 offset: const Offset(0, 4),
                               ),
@@ -166,7 +177,9 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                       height: 24,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF10B981)),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Color(0xFF10B981),
+                        ),
                       ),
                     ),
                     SizedBox(height: 12),
