@@ -367,6 +367,45 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
   }
 
   Widget _buildDetailsScoreCenter(BuildContext context) {
+    if (widget.match.homeScore != null) {
+      return Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            decoration: BoxDecoration(
+              color: Colors.black26,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Text(
+              '${widget.match.homeScore} - ${widget.match.awayScore}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 32,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+            decoration: BoxDecoration(
+              color: Colors.white24,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Text(
+              'FULL TIME',
+              style: TextStyle(
+                fontSize: 10,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final matchDateTime = settings.getMatchUtcDateTime(widget.match).toLocal();
     return Column(
@@ -447,7 +486,15 @@ class _MatchDetailsScreenState extends State<MatchDetailsScreen> {
               'Kickoff Time',
               settings.getFormattedTime(widget.match),
             ),
-            const SizedBox(height: 14),
+            if (widget.match.homeScore != null) ...[
+              _buildInfoRow(
+                context,
+                Icons.emoji_events,
+                'Score',
+                '${widget.match.homeScore} - ${widget.match.awayScore}',
+              ),
+              const SizedBox(height: 14),
+            ],
             _buildInfoRow(
               context,
               Icons.stadium_outlined,

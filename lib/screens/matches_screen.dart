@@ -70,7 +70,78 @@ class _MatchesScreenState extends State<MatchesScreen> {
 
     return Scaffold(
       bottomNavigationBar: const SizedBox.shrink(),
-      appBar: AppBar(title: const Text('World Cup Matches')),
+      appBar: AppBar(
+        title: const Text('World Cup Matches'),
+        actions: [
+          if (!matchProvider.isLoading)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Tooltip(
+                message: 'Data from: ${matchProvider.dataSource.toUpperCase()}',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: switch (matchProvider.dataSource) {
+                      'github' => Colors.green.shade600.withValues(alpha: 0.15),
+                      'cache' => Colors.orange.shade600.withValues(alpha: 0.15),
+                      _ => Colors.grey.shade600.withValues(alpha: 0.15),
+                    },
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: switch (matchProvider.dataSource) {
+                        'github' => Colors.green.shade600.withValues(alpha: 0.4),
+                        'cache' => Colors.orange.shade600.withValues(alpha: 0.4),
+                        _ => Colors.grey.shade600.withValues(alpha: 0.4),
+                      },
+                      width: 0.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        switch (matchProvider.dataSource) {
+                          'github' => Icons.cloud_done,
+                          'cache' => Icons.cloud_off,
+                          _ => Icons.storage,
+                        },
+                        size: 10,
+                        color: switch (matchProvider.dataSource) {
+                          'github' => Colors.green.shade600,
+                          'cache' => Colors.orange.shade600,
+                          _ => Colors.grey.shade600,
+                        },
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        switch (matchProvider.dataSource) {
+                          'github' => 'Live',
+                          'cache' => 'Cached',
+                          _ => 'Offline',
+                        },
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: switch (matchProvider.dataSource) {
+                            'github' => Colors.green.shade600,
+                            'cache' => Colors.orange.shade600,
+                            _ => Colors.grey.shade600,
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          if (matchProvider.errorMessage != null)
+            IconButton(
+              icon: const Icon(Icons.refresh, size: 20),
+              tooltip: 'Retry',
+              onPressed: () => matchProvider.loadMatches(),
+            ),
+        ],
+      ),
       body: Column(
         children: [
           // Search Bar
@@ -152,6 +223,9 @@ class _MatchesScreenState extends State<MatchesScreen> {
                 switch (filter) {
                   case MatchFilter.all:
                     label = 'ALL MATCHES';
+                    break;
+                  case MatchFilter.today:
+                    label = 'TODAY';
                     break;
                   case MatchFilter.upcoming:
                     label = 'UPCOMING';

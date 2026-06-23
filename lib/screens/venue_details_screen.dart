@@ -68,13 +68,12 @@ class _VenueDetailsScreenState extends State<VenueDetailsScreen> {
     final primaryColor = Theme.of(context).primaryColor;
 
     // Fetch matches scheduled at this stadium
-    final fixtures = matchProvider.matches
-        .where(
-          (match) =>
-              match.stadium.toLowerCase().trim() ==
-              widget.venue.name.toLowerCase().trim(),
-        )
-        .toList();
+    final venueKey = widget.venue.name.toLowerCase().trim();
+    final groundName = StadiumHelper.getGroundName(widget.venue.name).toLowerCase().trim();
+    final fixtures = matchProvider.matches.where((match) {
+      final matchStadium = match.stadium.toLowerCase().trim();
+      return matchStadium == groundName || matchStadium == venueKey;
+    }).toList();
 
     // Fetch stadium description and images
     final profile = StadiumHelper.getProfile(widget.venue.name);

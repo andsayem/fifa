@@ -13,6 +13,23 @@ class StadiumProfileModel {
 }
 
 class StadiumHelper {
+  /// Maps local venue names to GitHub JSON ground names
+  static final Map<String, String> venueToGround = {
+    'metlife stadium': 'New York/New Jersey (East Rutherford)',
+    'azteca stadium': 'Mexico City',
+    'sofi stadium': 'Los Angeles (Inglewood)',
+    'bc place': 'Vancouver',
+    'mercedes-benz stadium': 'Atlanta',
+    'at&t stadium': 'Dallas (Arlington)',
+    'bmo field': 'Toronto',
+    'hard rock stadium': 'Miami (Miami Gardens)',
+  };
+
+  /// Returns the GitHub ground name for a venue, or the venue name itself if not found.
+  static String getGroundName(String venueName) {
+    return venueToGround[venueName.toLowerCase().trim()] ?? venueName;
+  }
+
   static final Map<String, StadiumProfileModel> _stadiums = {
     'metlife stadium': StadiumProfileModel(
       name: 'MetLife Stadium',
