@@ -1,12 +1,18 @@
 class TeamLogoHelper {
+  static const _fallbackUrl = 'https://flagcdn.com/w320/un.png';
+
   static String getLogo(String teamName) {
+    if (teamName.isEmpty) return _fallbackUrl;
+
     final map = {
       "Mexico": "https://flagcdn.com/w320/mx.png",
       "South Africa": "https://flagcdn.com/w320/za.png",
       "South Korea": "https://flagcdn.com/w320/kr.png",
       "Czechia": "https://flagcdn.com/w320/cz.png",
+      "Czech Republic": "https://flagcdn.com/w320/cz.png",
       "Canada": "https://flagcdn.com/w320/ca.png",
       "Bosnia and Herzegovina": "https://flagcdn.com/w320/ba.png",
+      "Bosnia & Herzegovina": "https://flagcdn.com/w320/ba.png",
       "Qatar": "https://flagcdn.com/w320/qa.png",
       "Switzerland": "https://flagcdn.com/w320/ch.png",
       "Brazil": "https://flagcdn.com/w320/br.png",
@@ -44,6 +50,7 @@ class TeamLogoHelper {
       "Jordan": "https://flagcdn.com/w320/jo.png",
       "Portugal": "https://flagcdn.com/w320/pt.png",
       "Congo DR": "https://flagcdn.com/w320/cd.png",
+      "DR Congo": "https://flagcdn.com/w320/cd.png",
       "Uzbekistan": "https://flagcdn.com/w320/uz.png",
       "Colombia": "https://flagcdn.com/w320/co.png",
       "England": "https://flagcdn.com/w320/gb-eng.png",
@@ -63,7 +70,6 @@ class TeamLogoHelper {
       return map[matchedKey]!;
     }
 
-    // Dynamic generation fallback
-    return "https://flagcdn.com/w320/un.png";
+    return _fallbackUrl;
   }
 }

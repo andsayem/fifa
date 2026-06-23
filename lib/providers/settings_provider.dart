@@ -23,14 +23,48 @@ class SettingsProvider with ChangeNotifier {
   // Map each stadium to its respective UTC offset in June 2026 (DST active in US/Canada)
   int getStadiumUtcOffset(String stadium) {
     final s = stadium.toLowerCase();
-    if (s.contains('metlife') || s.contains('hard rock') || s.contains('bmo') || s.contains('mercedes-benz')) {
-      return -4; // Eastern Daylight Time (EDT) -> UTC-4
-    } else if (s.contains('at&t')) {
-      return -5; // Central Daylight Time (CDT) -> UTC-5
-    } else if (s.contains('azteca')) {
-      return -6; // Central Standard Time (CST, Mexico City doesn't observe DST) -> UTC-6
-    } else if (s.contains('sofi') || s.contains('bc place')) {
-      return -7; // Pacific Daylight Time (PDT) -> UTC-7
+    // Eastern Daylight (EDT) UTC-4: New York/NJ, Boston, Philadelphia, Atlanta, Miami, Toronto
+    if (s.contains('metlife') ||
+        s.contains('hard rock') ||
+        s.contains('bmo') ||
+        s.contains('mercedes-benz') ||
+        s.contains('east rutherford') ||
+        s.contains('new york') ||
+        s.contains('boston') ||
+        s.contains('foxborough') ||
+        s.contains('philadelphia') ||
+        s.contains('miami') ||
+        s.contains('toronto') ||
+        s.contains('atlanta')) {
+      return -4;
+    }
+    // Central Daylight (CDT) UTC-5: Dallas, Houston, Kansas City, Chicago
+    if (s.contains("at&t") ||
+        s.contains('arlington') ||
+        s.contains('dallas') ||
+        s.contains('houston') ||
+        s.contains('kansas city')) {
+      return -5;
+    }
+    // Central Standard (CST, Mexico - no DST) UTC-6: Mexico City, Guadalajara, Monterrey
+    if (s.contains('azteca') ||
+        s.contains('mexico city') ||
+        s.contains('guadalajara') ||
+        s.contains('zapopan') ||
+        s.contains('monterrey') ||
+        s.contains('guadalupe')) {
+      return -6;
+    }
+    // Pacific Daylight (PDT) UTC-7: Los Angeles, San Francisco, Seattle, Vancouver
+    if (s.contains('sofi') ||
+        s.contains('bc place') ||
+        s.contains('inglewood') ||
+        s.contains('los angeles') ||
+        s.contains('san francisco') ||
+        s.contains('santa clara') ||
+        s.contains('seattle') ||
+        s.contains('vancouver')) {
+      return -7;
     }
     return -5; // Fallback to central
   }

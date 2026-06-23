@@ -86,12 +86,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(width: 8),
             const Text(
-              'World Cup 2026 Match Shedule',
+              'World Cup Match Shedule',
               style: TextStyle(letterSpacing: 0.5),
             ),
           ],
         ),
         actions: [
+          _buildDataSourceBadge(matchProvider),
+          if (matchProvider.errorMessage != null)
+            IconButton(
+              icon: const Icon(Icons.refresh, size: 20),
+              tooltip: 'Retry loading matches',
+              onPressed: () => matchProvider.loadMatches(),
+            ),
           IconButton(
             icon: const Icon(Icons.settings),
             tooltip: 'Settings',
@@ -118,10 +125,54 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Dynamic Next Match Countdown Banner
+                    // Error banner
+                    if (matchProvider.errorMessage != null)
+                      Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.cloud_off,
+                              size: 16,
+                              color: Colors.red.shade700,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                matchProvider.errorMessage!,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.red.shade700,
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => matchProvider.loadMatches(),
+                              child: Icon(
+                                Icons.refresh,
+                                size: 18,
+                                color: Colors.red.shade700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    // Dynamic Next Match Countdown Card
                     _buildNextMatchCountdownCard(
                       context,
                       matchProvider.upcomingMatches,
+                      matchProvider.matches,
                     ),
 
                     // Subscribe / Remove Ads Banner
@@ -224,6 +275,48 @@ class _HomeScreenState extends State<HomeScreen> {
         label: const Text('Live TV'),
         backgroundColor: Colors.red.shade700,
         foregroundColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _buildDataSourceBadge(MatchProvider provider) {
+    if (provider.isLoading) return const SizedBox.shrink();
+    final (
+      String label,
+      Color color,
+      IconData icon,
+    ) = switch (provider.dataSource) {
+      'github' => ('Live', Colors.green.shade600, Icons.cloud_done),
+      'cache' => ('Cached', Colors.orange.shade600, Icons.cloud_off),
+      _ => ('Offline', Colors.grey.shade600, Icons.storage),
+    };
+    return Padding(
+      padding: const EdgeInsets.only(right: 4),
+      child: Tooltip(
+        message: 'Data from: ${provider.dataSource.toUpperCase()}',
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.15),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: color.withValues(alpha: 0.4), width: 0.5),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 10, color: color),
+              const SizedBox(width: 3),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -515,21 +608,50 @@ class _HomeScreenState extends State<HomeScreen> {
 Widget _buildNextMatchCountdownCard(
   BuildContext context,
   List<MatchModel> upcoming,
+  List<MatchModel> allMatches,
 ) {
-  if (upcoming.isEmpty) return const SizedBox.shrink();
-
-  // Sort to ensure closest is first
-  final sortedList = List<MatchModel>.from(upcoming);
-  sortedList.sort((a, b) {
-    final dtA = DateTime.parse("${a.date}T${a.time}:00");
-    final dtB = DateTime.parse("${b.date}T${b.time}:00");
-    return dtA.compareTo(dtB);
-  });
-
-  final nextMatch = sortedList.first;
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final settings = Provider.of<SettingsProvider>(context, listen: false);
-  final matchDateTime = settings.getMatchUtcDateTime(nextMatch).toLocal();
+
+  MatchModel? nextMatch;
+  bool isFinished = false;
+
+  if (upcoming.isNotEmpty) {
+    // Sort and pick closest upcoming match
+    final sortedList = List<MatchModel>.from(upcoming);
+    sortedList.sort((a, b) {
+      final dtA = DateTime.parse("${a.date}T${a.time}:00");
+      final dtB = DateTime.parse("${b.date}T${b.time}:00");
+      return dtA.compareTo(dtB);
+    });
+    nextMatch = sortedList.first;
+
+    // If the match is already in progress (time passed), treat as finished
+    try {
+      final dt = DateTime.parse("${nextMatch.date}T${nextMatch.time}:00");
+      if (dt.isBefore(DateTime.now()) && nextMatch.homeScore != null) {
+        isFinished = true;
+      }
+    } catch (_) {}
+  }
+
+  // No upcoming matches — show most recent finished match
+  if (nextMatch == null) {
+    final finished = allMatches
+        .where((m) => m.homeScore != null)
+        .toList();
+    if (finished.isEmpty) return const SizedBox.shrink();
+    finished.sort((a, b) {
+      final dtA = DateTime.parse("${b.date}T${b.time}:00");
+      final dtB = DateTime.parse("${a.date}T${a.time}:00");
+      return dtA.compareTo(dtB);
+    });
+    nextMatch = finished.first;
+    isFinished = true;
+  }
+
+  final match = nextMatch;
+  final matchDateTime = settings.getMatchUtcDateTime(match).toLocal();
 
   return Container(
     width: double.infinity,
@@ -554,17 +676,18 @@ Widget _buildNextMatchCountdownCard(
     ),
     child: Column(
       children: [
+        // Title row
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.timer_outlined,
+              isFinished ? Icons.emoji_events : Icons.timer_outlined,
               color: Theme.of(context).primaryColor,
               size: 18,
             ),
             const SizedBox(width: 8),
             Text(
-              'NEXT MATCH COUNTDOWN',
+              isFinished ? 'LAST MATCH RESULT' : 'NEXT MATCH COUNTDOWN',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
@@ -575,26 +698,42 @@ Widget _buildNextMatchCountdownCard(
           ],
         ),
         const SizedBox(height: 12),
-        MatchCountdownWidget(
-          targetDateTime: matchDateTime,
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.w900,
-            color: Theme.of(context).primaryColor,
-            letterSpacing: 0.5,
-          ),
-          finishedWidget: const Text(
-            'MATCH STARTED!',
+
+        // Score or Countdown
+        if (isFinished && match.homeScore != null)
+          Text(
+            '${match.homeScore} - ${match.awayScore}',
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green,
+              fontSize: 36,
+              fontWeight: FontWeight.w900,
+              color: Theme.of(context).primaryColor,
+              letterSpacing: 2,
+            ),
+          )
+        else
+          MatchCountdownWidget(
+            targetDateTime: matchDateTime,
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: Theme.of(context).primaryColor,
+              letterSpacing: 0.5,
+            ),
+            finishedWidget: const Text(
+              'MATCH STARTED!',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
             ),
           ),
-        ),
+
         const SizedBox(height: 14),
         const Divider(height: 1),
         const SizedBox(height: 14),
+
+        // Teams row
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -606,7 +745,7 @@ Widget _buildNextMatchCountdownCard(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          TeamDetailsScreen(teamName: nextMatch.homeTeam),
+                          TeamDetailsScreen(teamName: match.homeTeam),
                     ),
                   );
                 },
@@ -616,7 +755,7 @@ Widget _buildNextMatchCountdownCard(
                     horizontal: 8,
                   ),
                   child: Text(
-                    nextMatch.homeTeam,
+                    match.homeTeam,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -638,7 +777,9 @@ Widget _buildNextMatchCountdownCard(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  'VS',
+                  isFinished && match.homeScore != null
+                      ? 'FT'
+                      : 'VS',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
@@ -655,7 +796,7 @@ Widget _buildNextMatchCountdownCard(
                     context,
                     MaterialPageRoute(
                       builder: (context) =>
-                          TeamDetailsScreen(teamName: nextMatch.awayTeam),
+                          TeamDetailsScreen(teamName: match.awayTeam),
                     ),
                   );
                 },
@@ -665,7 +806,7 @@ Widget _buildNextMatchCountdownCard(
                     horizontal: 8,
                   ),
                   child: Text(
-                    nextMatch.awayTeam,
+                    match.awayTeam,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -700,7 +841,7 @@ Widget _buildNextMatchCountdownCard(
               const SizedBox(width: 4),
               Flexible(
                 child: Text(
-                  nextMatch.stadium,
+                  match.stadium,
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                   overflow: TextOverflow.ellipsis,
                 ),

@@ -255,6 +255,39 @@ class MatchCard extends StatelessWidget {
   }
 
   Widget _buildScoreOrTime(BuildContext context) {
+    if (match.homeScore != null) {
+      // Show scores for finished matches
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              '${match.homeScore} - ${match.awayScore}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Theme.of(context).primaryColor,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'FT',
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      );
+    }
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final settings = Provider.of<SettingsProvider>(context, listen: false);
     final matchDateTime = settings.getMatchUtcDateTime(match).toLocal();
@@ -275,12 +308,11 @@ class MatchCard extends StatelessWidget {
                   : Colors.grey.shade200,
             ),
           ),
-          child: Text(
+          child: const Text(
             'VS',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 14,
-              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
             ),
           ),
         ),
