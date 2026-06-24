@@ -11,9 +11,12 @@ import 'providers/team_provider.dart';
 import 'providers/favorite_provider.dart';
 import 'providers/bracket_provider.dart';
 import 'providers/settings_provider.dart';
+import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
 import 'presentation/controllers/purchase_controller.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +25,9 @@ Future<void> main() async {
   final appDir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(appDir.path);
 
+  await NotificationService.instance.initialize();
+  NotificationService.instance.attachNavigatorKey(navigatorKey);
+
   runApp(
     const ProviderScope(
       child: MyApp(),
@@ -29,8 +35,23 @@ Future<void> main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _initNotifications();
+  }
+
+  Future<void> _initNotifications() async {
+    await NotificationService.instance.requestPermission();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +59,16 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => FavoriteProvider()),
         ChangeNotifierProvider(create: (_) => TeamProvider()),
-        ChangeNotifierProvider(create: (_) => MatchProvider()),
-        ChangeNotifierProvider(create: (_) => BracketProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
+        ChangeNotifierProvider(
+          create: (ctx) => MatchProvider(
+            settingsProvider: ctx.read<SettingsProvider>(),
+          ),
+        ),
+        ChangeNotifierProvider(create: (_) => BracketProvider()),
       ],
       child: GetMaterialApp(
+        navigatorKey: navigatorKey,
         title: 'World Cup 2026 Match Shedule',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.lightTheme,

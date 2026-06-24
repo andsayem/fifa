@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/match_model.dart';
 import '../services/static_api_service.dart';
+import '../services/notification_service.dart';
+import 'settings_provider.dart';
 
 enum MatchFilter { all, today, upcoming, finished }
 
@@ -21,6 +23,7 @@ class MatchProvider with ChangeNotifier {
   String? _errorMessage;
   MatchFilter _currentFilter = MatchFilter.all;
   String _searchQuery = '';
+  final SettingsProvider _settings;
 
   List<MatchModel> get matches => _matches;
   bool get isLoading => _isLoading;
@@ -29,7 +32,8 @@ class MatchProvider with ChangeNotifier {
   MatchFilter get currentFilter => _currentFilter;
   String get searchQuery => _searchQuery;
 
-  MatchProvider() {
+  MatchProvider({required SettingsProvider settingsProvider})
+      : _settings = settingsProvider {
     _dio = Dio(BaseOptions(
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 15),
@@ -61,6 +65,7 @@ class MatchProvider with ChangeNotifier {
         _isLoading = false;
         notifyListeners();
         _cacheMatches(data);
+        _scheduleNotifications();
         debugPrint('[MatchProvider] Loaded ${_matches.length} matches from GitHub');
         return;
       }
@@ -87,6 +92,7 @@ class MatchProvider with ChangeNotifier {
           _errorMessage = null;
           _isLoading = false;
           notifyListeners();
+          _scheduleNotifications();
           debugPrint('[MatchProvider] Loaded ${_matches.length} matches from cache');
           return;
         }
@@ -102,7 +108,15 @@ class MatchProvider with ChangeNotifier {
     _errorMessage = null;
     _isLoading = false;
     notifyListeners();
+    _scheduleNotifications();
     debugPrint('[MatchProvider] Loaded ${_matches.length} matches from local JSON');
+  }
+
+  Future<void> _scheduleNotifications() async {
+    _settings.setLastLoadedMatches(_matches);
+    await NotificationService.instance.rescheduleAllNotifications(
+      matches: _matches,
+    );
   }
 
   Future<void> _cacheMatches(Map<String, dynamic> data) async {
