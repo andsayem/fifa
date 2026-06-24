@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/match_model.dart';
+import '../services/notification_service.dart';
 
 enum TimezoneMode { device, stadium, utc, custom }
 
@@ -7,8 +9,19 @@ class SettingsProvider with ChangeNotifier {
   TimezoneMode _timezoneMode = TimezoneMode.device; // Default: Device/Country Time
   int _customOffsetHours = 6; // Default custom offset (e.g. GMT+6 for Bangladesh)
 
+  bool _notificationsEnabled = true;
+  bool _remind30minBefore = true;
+  List<MatchModel> _lastLoadedMatches = [];
+
   TimezoneMode get timezoneMode => _timezoneMode;
   int get customOffsetHours => _customOffsetHours;
+  bool get notificationsEnabled => _notificationsEnabled;
+  bool get remind30minBefore => _remind30minBefore;
+  List<MatchModel> get lastLoadedMatches => _lastLoadedMatches;
+
+  void setLastLoadedMatches(List<MatchModel> matches) {
+    _lastLoadedMatches = matches;
+  }
 
   void setTimezoneMode(TimezoneMode mode) {
     _timezoneMode = mode;
@@ -18,6 +31,47 @@ class SettingsProvider with ChangeNotifier {
   void setCustomOffset(int offset) {
     _customOffsetHours = offset;
     notifyListeners();
+  }
+
+  Future<void> loadNotificationSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
+    _remind30minBefore = prefs.getBool('remind_30min_before') ?? true;
+    notifyListeners();
+  }
+
+  Future<void> setNotificationsEnabled(bool value) async {
+    _notificationsEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('notifications_enabled', value);
+    notifyListeners();
+
+    if (!value) {
+      await NotificationService.instance.cancelAllNotifications();
+    } else if (_lastLoadedMatches.isNotEmpty) {
+      await NotificationService.instance.rescheduleAllNotifications(
+        matches: _lastLoadedMatches,
+        isEnabled: _notificationsEnabled,
+        remind30MinBefore: _remind30minBefore,
+      );
+    }
+  }
+
+  Future<void> setRemind30minBefore(bool value) async {
+    _remind30minBefore = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('remind_30min_before', value);
+    notifyListeners();
+
+    if (!value) {
+      await NotificationService.instance.cancelAllNotifications();
+    } else if (_notificationsEnabled && _lastLoadedMatches.isNotEmpty) {
+      await NotificationService.instance.rescheduleAllNotifications(
+        matches: _lastLoadedMatches,
+        isEnabled: _notificationsEnabled,
+        remind30MinBefore: _remind30minBefore,
+      );
+    }
   }
 
   // Map each stadium to its respective UTC offset in June 2026 (DST active in US/Canada)
@@ -92,6 +146,70 @@ class SettingsProvider with ChangeNotifier {
   // Get the parsed DateTime of the match in UTC (MatchModel version)
   DateTime getMatchUtcDateTime(MatchModel match) {
     return getRawUtcDateTime(match.date, match.time, match.stadium);
+  }
+
+  static DateTime staticMatchUtcDateTime(MatchModel match) {
+    return staticUtcDateTime(match.date, match.time, match.stadium);
+  }
+
+  static DateTime staticUtcDateTime(String date, String time, String? stadium) {
+    try {
+      final parts = date.split('-');
+      final timeParts = time.split(':');
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[2]);
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+      final offset = stadium != null ? _stadiumUtcOffset(stadium) : -5;
+      return DateTime.utc(year, month, day, hour, minute).subtract(Duration(hours: offset));
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
+  static int _stadiumUtcOffset(String stadium) {
+    final s = stadium.toLowerCase();
+    if (s.contains('metlife') ||
+        s.contains('hard rock') ||
+        s.contains('bmo') ||
+        s.contains('mercedes-benz') ||
+        s.contains('east rutherford') ||
+        s.contains('new york') ||
+        s.contains('boston') ||
+        s.contains('foxborough') ||
+        s.contains('philadelphia') ||
+        s.contains('miami') ||
+        s.contains('toronto') ||
+        s.contains('atlanta')) {
+      return -4;
+    }
+    if (s.contains("at&t") ||
+        s.contains('arlington') ||
+        s.contains('dallas') ||
+        s.contains('houston') ||
+        s.contains('kansas city')) {
+      return -5;
+    }
+    if (s.contains('azteca') ||
+        s.contains('mexico city') ||
+        s.contains('guadalajara') ||
+        s.contains('zapopan') ||
+        s.contains('monterrey') ||
+        s.contains('guadalupe')) {
+      return -6;
+    }
+    if (s.contains('sofi') ||
+        s.contains('bc place') ||
+        s.contains('inglewood') ||
+        s.contains('los angeles') ||
+        s.contains('san francisco') ||
+        s.contains('santa clara') ||
+        s.contains('seattle') ||
+        s.contains('vancouver')) {
+      return -7;
+    }
+    return -5;
   }
 
   // Get the DateTime adjusted to the user's preferred timezone setting
