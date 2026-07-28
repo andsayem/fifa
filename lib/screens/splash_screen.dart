@@ -129,7 +129,7 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Column(
                       children: [
                         Text(
-                          'World Cup 2026',
+                          'World Cup History',
                           style: TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w900,
@@ -147,15 +147,6 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                         const SizedBox(height: 4),
-                        const Text(
-                          'L I V E',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 8.0,
-                            color: Color(0xFF10B981),
-                          ),
-                        ),
                       ],
                     ),
                   ),

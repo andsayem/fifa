@@ -56,7 +56,27 @@ class TeamLogoHelper {
       "England": "https://flagcdn.com/w320/gb-eng.png",
       "Croatia": "https://flagcdn.com/w320/hr.png",
       "Ghana": "https://flagcdn.com/w320/gh.png",
-      "Panama": "https://flagcdn.com/w320/pa.png"
+      "Panama": "https://flagcdn.com/w320/pa.png",
+      "Hungary": "https://flagcdn.com/w320/hu.png",
+      "Poland": "https://flagcdn.com/w320/pl.png",
+      "Soviet Union": "https://flagcdn.com/w320/su.png",
+      "Czechoslovakia": "https://flagcdn.com/w320/cz.png",
+      "Yugoslavia": "https://flagcdn.com/w320/rs.png",
+      "Bulgaria": "https://flagcdn.com/w320/bg.png",
+      "Cameroon": "https://flagcdn.com/w320/cm.png",
+      "Russia": "https://flagcdn.com/w320/ru.png",
+      "Ireland": "https://flagcdn.com/w320/ie.png",
+      "Northern Ireland": "https://flagcdn.com/w320/gb-nir.png",
+      "Wales": "https://flagcdn.com/w320/gb-wls.png",
+      "West Germany": "https://flagcdn.com/w320/de.png",
+      "East Germany": "https://flagcdn.com/w320/de.png",
+      "Bolivia": "https://flagcdn.com/w320/bo.png",
+      "Peru": "https://flagcdn.com/w320/pe.png",
+      "Romania": "https://flagcdn.com/w320/ro.png",
+      "Cuba": "https://flagcdn.com/w320/cu.png",
+      "Indonesia": "https://flagcdn.com/w320/id.png",
+      "Dutch East Indies": "https://flagcdn.com/w320/id.png",
+      "India": "https://flagcdn.com/w320/in.png"
     };
 
     // Case-insensitive lookup helper

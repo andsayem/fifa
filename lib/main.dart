@@ -11,6 +11,7 @@ import 'providers/team_provider.dart';
 import 'providers/favorite_provider.dart';
 import 'providers/bracket_provider.dart';
 import 'providers/settings_provider.dart';
+import 'providers/history_provider.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
 import 'screens/splash_screen.dart';
@@ -28,11 +29,7 @@ Future<void> main() async {
   await NotificationService.instance.initialize();
   NotificationService.instance.attachNavigatorKey(navigatorKey);
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -61,11 +58,11 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => TeamProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(
-          create: (ctx) => MatchProvider(
-            settingsProvider: ctx.read<SettingsProvider>(),
-          ),
+          create: (ctx) =>
+              MatchProvider(settingsProvider: ctx.read<SettingsProvider>()),
         ),
         ChangeNotifierProvider(create: (_) => BracketProvider()),
+        ChangeNotifierProvider(create: (_) => HistoryProvider()..loadData()),
       ],
       child: GetMaterialApp(
         navigatorKey: navigatorKey,
