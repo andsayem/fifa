@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/history_provider.dart';
 import '../../models/tournament_model.dart';
+import '../../widgets/banner_ad_widget.dart';
 
 class GoldenBootScreen extends StatelessWidget {
   const GoldenBootScreen({super.key});
@@ -23,13 +24,20 @@ class GoldenBootScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: scorers.length,
-        itemBuilder: (context, index) {
-          final t = scorers[index];
-          return _buildScorerCard(context, t, index);
-        },
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: scorers.length,
+              itemBuilder: (context, index) {
+                final t = scorers[index];
+                return _buildScorerCard(context, t, index);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -77,7 +85,7 @@ class GoldenBootScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${t.topScorer.country}',
+                    t.topScorer.country,
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,

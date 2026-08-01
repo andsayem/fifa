@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/history_provider.dart';
 import '../../models/tournament_model.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/team_logo_helper.dart';
 import 'history_details_screen.dart';
 
@@ -25,13 +26,20 @@ class FinalsHistoryScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: finals.length,
-        itemBuilder: (context, index) {
-          final t = finals[index];
-          return _buildFinalCard(context, t, index);
-        },
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: finals.length,
+              itemBuilder: (context, index) {
+                final t = finals[index];
+                return _buildFinalCard(context, t, index);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -94,7 +102,7 @@ class FinalsHistoryScreen extends StatelessWidget {
                             width: 36,
                             height: 36,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            errorBuilder: (_, _, _) =>
                                 const CircleAvatar(radius: 18, child: Icon(Icons.flag, size: 18)),
                           ),
                         ),
@@ -156,7 +164,7 @@ class FinalsHistoryScreen extends StatelessWidget {
                             width: 36,
                             height: 36,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) =>
+                            errorBuilder: (_, _, _) =>
                                 const CircleAvatar(radius: 18, child: Icon(Icons.flag, size: 18)),
                           ),
                         ),

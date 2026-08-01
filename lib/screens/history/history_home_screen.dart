@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/history_provider.dart';
 import '../../models/tournament_model.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/team_logo_helper.dart';
 import 'history_details_screen.dart';
 import 'champions_list_screen.dart';
@@ -71,30 +72,37 @@ class _HistoryHomeScreenState extends State<HistoryHomeScreen>
           ),
         ],
       ),
-      body: provider.isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: provider.loadData,
-              child: CustomScrollView(
-                slivers: [
-                  SliverToBoxAdapter(child: _buildQuickStats(context, provider)),
-                  SliverToBoxAdapter(child: _buildQuickLinks(context)),
-                  SliverToBoxAdapter(
-                    child: _buildSectionTitle(context, 'All Tournaments', Icons.emoji_events_outlined),
-                  ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        final tournament = provider.tournaments[index];
-                        return _buildTournamentCard(context, tournament, index);
-                      },
-                      childCount: provider.tournaments.length,
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(
+            child: provider.isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : RefreshIndicator(
+                    onRefresh: provider.loadData,
+                    child: CustomScrollView(
+                      slivers: [
+                        SliverToBoxAdapter(child: _buildQuickStats(context, provider)),
+                        SliverToBoxAdapter(child: _buildQuickLinks(context)),
+                        SliverToBoxAdapter(
+                          child: _buildSectionTitle(context, 'All Tournaments', Icons.emoji_events_outlined),
+                        ),
+                        SliverList(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              final tournament = provider.tournaments[index];
+                              return _buildTournamentCard(context, tournament, index);
+                            },
+                            childCount: provider.tournaments.length,
+                          ),
+                        ),
+                        const SliverToBoxAdapter(child: SizedBox(height: 32)),
+                      ],
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 32)),
-                ],
-              ),
-            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -384,7 +392,7 @@ class _HistoryHomeScreenState extends State<HistoryHomeScreen>
                                   width: 20,
                                   height: 20,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (_, __, ___) => CircleAvatar(
+                                  errorBuilder: (_, _, _) => CircleAvatar(
                                     radius: 10,
                                     child: Text(t.winner[0], style: const TextStyle(fontSize: 10)),
                                   ),

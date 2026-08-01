@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/history_provider.dart';
 import '../../models/tournament_model.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/team_logo_helper.dart';
 import 'history_details_screen.dart';
 
@@ -26,13 +27,20 @@ class HostCountriesScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: tournaments.length,
-        itemBuilder: (context, index) {
-          final t = tournaments[index];
-          return _buildHostCard(context, t, index == tournaments.length - 1);
-        },
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: tournaments.length,
+              itemBuilder: (context, index) {
+                final t = tournaments[index];
+                return _buildHostCard(context, t, index == tournaments.length - 1);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -109,7 +117,7 @@ class HostCountriesScreen extends StatelessWidget {
                                 width: 24,
                                 height: 24,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
+                                errorBuilder: (_, _, _) =>
                                     const CircleAvatar(radius: 12, child: Icon(Icons.flag, size: 12)),
                               ),
                             ),
