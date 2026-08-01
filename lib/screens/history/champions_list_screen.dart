@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/history_provider.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/team_logo_helper.dart';
 
 class ChampionsListScreen extends StatelessWidget {
@@ -25,22 +26,29 @@ class ChampionsListScreen extends StatelessWidget {
           ],
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: sorted.length,
-        itemBuilder: (context, index) {
-          final entry = sorted[index];
-          final country = entry.key;
-          final titles = entry.value;
-          final years = provider.championsOnly
-              .where((t) => t.winner == country)
-              .map((t) => t.year)
-              .toList()
-            ..sort();
-          final rank = index + 1;
+      body: Column(
+        children: [
+          const BannerAdWidget(),
+          Expanded(
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: sorted.length,
+              itemBuilder: (context, index) {
+                final entry = sorted[index];
+                final country = entry.key;
+                final titles = entry.value;
+                final years = provider.championsOnly
+                    .where((t) => t.winner == country)
+                    .map((t) => t.year)
+                    .toList()
+                  ..sort();
+                final rank = index + 1;
 
-          return _buildChampionTile(context, country, titles, years, rank);
-        },
+                return _buildChampionTile(context, country, titles, years, rank);
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -92,7 +100,7 @@ class ChampionsListScreen extends StatelessWidget {
                 width: 40,
                 height: 40,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
+                errorBuilder: (_, _, _) =>
                     const CircleAvatar(radius: 20, child: Icon(Icons.flag, size: 20)),
               ),
             ),

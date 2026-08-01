@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/history_provider.dart';
 import '../../models/tournament_model.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/team_logo_helper.dart';
 import 'history_details_screen.dart';
 
@@ -36,6 +37,7 @@ class _HistorySearchScreenState extends State<HistorySearchScreen> {
       ),
       body: Column(
         children: [
+          const BannerAdWidget(),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
             child: TextField(
@@ -356,7 +358,7 @@ class _HistorySearchScreenState extends State<HistorySearchScreen> {
                   width: 18,
                   height: 18,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
+                  errorBuilder: (_, _, _) =>
                       CircleAvatar(radius: 9, child: Text(t.winner[0], style: const TextStyle(fontSize: 9))),
                 ),
               ),

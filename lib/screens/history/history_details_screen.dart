@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/tournament_model.dart';
+import '../../widgets/banner_ad_widget.dart';
 import '../../widgets/team_logo_helper.dart';
 
 class HistoryDetailsScreen extends StatelessWidget {
@@ -76,7 +77,7 @@ class HistoryDetailsScreen extends StatelessWidget {
                                     width: 28,
                                     height: 28,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) =>
+                                    errorBuilder: (_, _, _) =>
                                         const CircleAvatar(radius: 14, child: Icon(Icons.flag, size: 14)),
                                   ),
                                 ),
@@ -99,6 +100,7 @@ class HistoryDetailsScreen extends StatelessWidget {
               ),
             ),
           ),
+          const SliverToBoxAdapter(child: BannerAdWidget()),
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -178,7 +180,7 @@ class HistoryDetailsScreen extends StatelessWidget {
                   width: 48,
                   height: 48,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
+                  errorBuilder: (_, _, _) =>
                       const CircleAvatar(radius: 24, child: Icon(Icons.flag)),
                 ),
               ),
@@ -313,7 +315,7 @@ class HistoryDetailsScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorBuilder: (_, _, _) =>
                           const CircleAvatar(radius: 20, child: Icon(Icons.flag, size: 20)),
                     ),
                   ),
@@ -367,7 +369,7 @@ class HistoryDetailsScreen extends StatelessWidget {
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) =>
+                      errorBuilder: (_, _, _) =>
                           const CircleAvatar(radius: 20, child: Icon(Icons.flag, size: 20)),
                     ),
                   ),
